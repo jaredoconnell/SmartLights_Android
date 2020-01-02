@@ -7,15 +7,15 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="net.shadowxcraft.smartlights.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:name="net.shadowxcraft.smartlights.ui.home.LedStripsFragment"
+        android:label="@string/title_led_strips"
+        tools:layout="@layout/fragment_led_strips" />
 
-    <fragment
+    <!--<fragment
         android:id="@+id/navigation_dashboard"
         android:name="net.shadowxcraft.smartlights.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:label="@string/title_timers"
+        tools:layout="@layout/fragment_timers" />-->
 
     <fragment
         android:id="@+id/navigation_notifications"

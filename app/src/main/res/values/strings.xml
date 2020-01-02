@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">SmartLights</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_led_strips">Led Strips</string>
+    <string name="title_timers">Timers</string>
     <string name="title_notifications">Notifications</string>
+    <string name="manage_bluetooth">Manage Bluetooth Light Controllers</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

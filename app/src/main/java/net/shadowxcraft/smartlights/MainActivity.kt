@@ -1,15 +1,24 @@
 package net.shadowxcraft.smartlights
 
+import android.Manifest
 import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
+import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.EasyPermissions
 
-class MainActivity : AppCompatActivity(), ControllersFragment.OnFragmentInteractionListener {
+const val REQUEST_LOCATION_PERMISSION = 100
+
+class MainActivity : AppCompatActivity(), ControllersFragment.OnFragmentInteractionListener,
+    BluetoothFragment.OnFragmentInteractionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,10 +35,44 @@ class MainActivity : AppCompatActivity(), ControllersFragment.OnFragmentInteract
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        requestLocationPermission()
     }
 
     override fun onFragmentInteraction(uri: Uri) {
 
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions,
+            grantResults, this)
+        startBluetooth()
+    }
+
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    fun requestLocationPermission() {
+        val perms = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (EasyPermissions.hasPermissions(this, *perms)) {
+            startBluetooth()
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                "Location perms are required to connect to" +
+                "the light strip controllers via bluetooth!",
+                REQUEST_LOCATION_PERMISSION,
+                *perms
+            )
+        }
+    }
+
+    private fun startBluetooth() {
+        Toast.makeText(this, "Starting bluetooth..", Toast.LENGTH_SHORT).show()
+
+        BLEControllerManager.init(this)
+    }
 }

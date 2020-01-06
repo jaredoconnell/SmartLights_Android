@@ -1,4 +1,4 @@
-package net.shadowxcraft.smartlights
+package net.shadowxcraft.smartlights.ui.controllers
 
 import android.content.Context
 import android.net.Uri
@@ -7,6 +7,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.snackbar.Snackbar
+import net.shadowxcraft.smartlights.R
+import net.shadowxcraft.smartlights.R.*
+import net.shadowxcraft.smartlights.Utils
+import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,7 +45,13 @@ class ControllersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_controllers, container, false)
+        val currentView: View = inflater.inflate(layout.fragment_controllers, container, false)
+        val fab: View = currentView.findViewById(R.id.controllers_floating_action_button)
+        fab.setOnClickListener {
+            Utils.replaceFragment(BluetoothFragment(), fragmentManager)
+        }
+
+        return currentView
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
+
+    <TextView
+        android:id="@+id/bluetooth_device_name"
+        android:layout_width="174dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Device"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
+        />
+
+    <TextView
+        android:id="@+id/bluetooth_device_address"
+        android:layout_width="5dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Address"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textSize="5sp" />
+
+    <Button
+        android:id="@+id/bluetooth_device_connect_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textSize="12sp"
+        android:text="Connect"
+        />
+
+</LinearLayout>

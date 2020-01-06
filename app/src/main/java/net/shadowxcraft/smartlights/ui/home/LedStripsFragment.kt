@@ -7,8 +7,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import net.shadowxcraft.smartlights.ControllersFragment
+import net.shadowxcraft.smartlights.MainActivity
+import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
 import net.shadowxcraft.smartlights.R
+import net.shadowxcraft.smartlights.Utils
 
 
 class LedStripsFragment : Fragment() {
@@ -41,17 +43,12 @@ class LedStripsFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.open_controller_menu -> {
-                replaceFragment(ControllersFragment())
+                Utils.replaceFragment(ControllersFragment(), fragmentManager)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun replaceFragment(someFragment: Fragment?) {
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-        transaction.replace(R.id.nav_host_fragment, someFragment!!)
-        transaction.addToBackStack(null)
-        transaction.commit()
-    }
+
 }

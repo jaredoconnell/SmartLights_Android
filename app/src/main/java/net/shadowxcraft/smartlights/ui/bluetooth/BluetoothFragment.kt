@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.ClickListener
+import net.shadowxcraft.smartlights.MainActivity
 import net.shadowxcraft.smartlights.R
 
 
@@ -169,8 +170,10 @@ class BluetoothFragment : Fragment(), ClickListener {
     }
 
     override fun onPositionClicked(position: Int) {
+        scanner?.stopScan(scanCallback)
         Log.println(Log.INFO, "BluetoothFragment", "Selected: " + foundBluetoothDevices[position])
-
+        BLEControllerManager.connectTo(foundBluetoothDevices[position])
+        (context as MainActivity).supportFragmentManager.popBackStackImmediate()
     }
 
 

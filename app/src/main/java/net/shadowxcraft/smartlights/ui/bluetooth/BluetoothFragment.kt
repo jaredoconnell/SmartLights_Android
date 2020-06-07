@@ -44,7 +44,7 @@ class BluetoothFragment : Fragment(), ClickListener {
     private var scanner: BluetoothLeScanner? = null
     private var scanCallback: ScanCallbackImpl = ScanCallbackImpl()
     private var foundBluetoothDevices: ArrayList<BluetoothDevice> = ArrayList()
-    private var adapter: BluetoothAdapter? = null
+    private var adapter: BluetoothListAdapter? = null
 
     inner class ScanCallbackImpl : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult ) {
@@ -91,7 +91,7 @@ class BluetoothFragment : Fragment(), ClickListener {
         rvDevices.addItemDecoration(itemDecoration)
 
         // Create adapter passing in the sample user data
-        adapter = BluetoothAdapter(foundBluetoothDevices, this)
+        adapter = BluetoothListAdapter(foundBluetoothDevices, this)
 
         // Attach the adapter to the recyclerview to populate items
         rvDevices.adapter = adapter
@@ -115,7 +115,7 @@ class BluetoothFragment : Fragment(), ClickListener {
         if (context is OnFragmentInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
+            throw RuntimeException("$context must implement OnFragmentInteractionListener")
         }
     }
 

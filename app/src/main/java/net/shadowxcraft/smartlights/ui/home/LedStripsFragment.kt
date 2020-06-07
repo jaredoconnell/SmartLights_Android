@@ -26,7 +26,7 @@ class LedStripsFragment : Fragment() {
             ViewModelProviders.of(this).get(LedStripViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_led_strips, container, false)
         val textView: TextView = root.findViewById(R.id.text_led_strips)
-        ledStripsViewModel.text.observe(this, Observer {
+        ledStripsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
 
@@ -35,8 +35,8 @@ class LedStripsFragment : Fragment() {
         return root
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.led_strip_menu, menu)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.led_strip_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 

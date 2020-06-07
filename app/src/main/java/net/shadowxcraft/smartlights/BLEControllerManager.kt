@@ -11,17 +11,22 @@ import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
-import sun.audio.AudioDevice.device
 import java.util.*
 
 
 const val REQUEST_ENABLE_BT = 50
 
 object BLEControllerManager {
-    val connected: HashMap<BluetoothDevice, BluetoothGatt> = HashMap()
-    var bluetoothAdapter: BluetoothAdapter? = null
+
+
+    // BluetoothDevice represents the device that can be connected
+    // BluetoothGatt represents the actual connection.
+    private val connected: HashMap<BluetoothDevice, ESP32> = HashMap()
+    val controllers: ArrayList<ESP32> = ArrayList()
+    private var bluetoothAdapter: BluetoothAdapter? = null
     var activity: Activity? = null
     var discoverServicesRunnable: Runnable? = null
+    var listener: BluetoothConnectionListener? = null
 
     private fun convertFromInteger(i: Int): UUID? {
         val msb = 0x0000000000001000L
@@ -30,7 +35,7 @@ object BLEControllerManager {
         return UUID(msb or (value shl 32), lsb)
     }
 
-    val SERVICE_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
+    val SERVICE_UUID: UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
     val MEASUREMENT_CHAR_UUID = SERVICE_UUID//convertFromInteger(0x2A37)
     val CONTROL_POINT_CHAR_UUID = SERVICE_UUID//convertFromInteger(0x2A39)
     val CLIENT_CHARACTERISTIC_CONFIG_UUID = SERVICE_UUID//convertFromInteger(0x2902)
@@ -54,8 +59,10 @@ object BLEControllerManager {
     }
 
     fun connectTo(device: BluetoothDevice): Boolean {
-        if(connected.contains(device)) {
-            connected[device]?.connect()
+        if(device in connected) {
+            val controller = connected[device]
+            controller!!.bluetoothConnection?.connect()
+            controller.checkName(this.activity!!, listener)
             return false
         } else {
             val gattCallback = object : BluetoothGattCallback() {
@@ -101,10 +108,12 @@ object BLEControllerManager {
                                             discoverServicesRunnable = null
                                         }
                                         val handler = Handler()
-                                        handler.postDelayed(discoverServicesRunnable, delay)
+                                        handler.postDelayed(discoverServicesRunnable!!, delay)
                                     }
                                 }
+
                             }
+
                             BluetoothProfile.STATE_DISCONNECTED -> {
                                 // We successfully disconnected on our own request
                                 gatt.close()
@@ -129,7 +138,7 @@ object BLEControllerManager {
                 }
                 override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int){
                     Log.println(Log.INFO, "BluetoothGattCallback", "Services discovered")
-                    val characteristic: BluetoothGattCharacteristic =
+                    /*val characteristic: BluetoothGattCharacteristic =
                         gatt.getService(SERVICE_UUID)
                             .getCharacteristic(MEASUREMENT_CHAR_UUID)
 
@@ -137,7 +146,7 @@ object BLEControllerManager {
                     characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_UUID)
 
                     descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;
-                    gatt.writeDescriptor(descriptor)
+                    gatt.writeDescriptor(descriptor)*/
                 }
 
                 override fun onDescriptorWrite(
@@ -162,12 +171,27 @@ object BLEControllerManager {
                 }
             }
             val gatt = device.connectGatt(activity, false, gattCallback, TRANSPORT_LE)
-            connected[device] = gatt
+            val newController = ESP32()
+            newController.device = device
+            newController.bluetoothConnection = gatt
+            connected[device] = newController
+            controllers.add(newController)
+            newController.checkName(this.activity!!, listener)
+            Log.println(Log.INFO, "BLEControllerManager", "Is connecting")
+            listener?.onControllerChange(newController)
             return true
         }
     }
 
     fun processData(byteArray: ByteArray) {
         println("Got data: $byteArray")
+    }
+
+    fun setConnectionListener(listener: BluetoothConnectionListener) {
+        this.listener = listener
+    }
+
+    interface BluetoothConnectionListener {
+        fun onControllerChange(device: ESP32)
     }
 }

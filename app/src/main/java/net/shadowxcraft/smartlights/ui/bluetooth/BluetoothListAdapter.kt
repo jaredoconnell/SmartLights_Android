@@ -8,16 +8,17 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.welie.blessed.BluetoothPeripheral
 import net.shadowxcraft.smartlights.ClickListener
 import net.shadowxcraft.smartlights.R
 
 
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
-class BluetoothListAdapter(deviceList: ArrayList<BluetoothDevice>,
+class BluetoothListAdapter(deviceList: ArrayList<BluetoothPeripheral>,
                            private val clickListener: ClickListener
 ) : RecyclerView.Adapter<BluetoothListAdapter.ViewHolder?>() {
-    private val devicesList: ArrayList<BluetoothDevice> = deviceList
+    private val devicesList: ArrayList<BluetoothPeripheral> = deviceList
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -57,7 +58,7 @@ class BluetoothListAdapter(deviceList: ArrayList<BluetoothDevice>,
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // Get the data model based on position
-        val device: BluetoothDevice = devicesList[position]
+        val device: BluetoothPeripheral = devicesList[position]
 
         // Set item views based on your views and data model
         val nameTextView: TextView = holder.nameTextView

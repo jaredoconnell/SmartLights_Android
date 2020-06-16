@@ -23,7 +23,7 @@
         android:layout_width="5dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Address"
+        android:text="@string/address"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textSize="5sp" />
 
@@ -34,7 +34,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:textSize="12sp"
-        android:text="Connect"
+        android:text="@string/connect"
         />
 
 </LinearLayout>

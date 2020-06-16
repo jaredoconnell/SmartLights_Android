@@ -16,26 +16,44 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/controller_list_message" />
+        android:text="@string/add_led_strip_component" />
 
-    <View
+    <EditText
+        android:id="@+id/new_led_strip_name"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_below="@id/text_controllers"/>
-
+        android:layout_height="wrap_content"
+        android:inputType="textCapWords"
+        android:hint="@string/name_controller_field"
+        android:autofillHints=""
+        android:layout_below="@+id/text_controllers">
+        <requestFocus />
+    </EditText>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_controllers"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:layout_below="@id/text_controllers"
+        android:layout_below="@id/new_led_strip_name"
+        android:paddingBottom="60dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/controllers_floating_action_button"
+        android:id="@+id/add_led_strip_component_floating_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="end"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="150dp"
+        android:src="@drawable/ic_add_black_24dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/complete_led_strip_components"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -45,6 +63,6 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="14dp"
         android:layout_marginBottom="77dp"
-        android:src="@drawable/ic_add_black_24dp" />
+        android:src="@drawable/ic_baseline_check_24"/>
 
 </RelativeLayout>

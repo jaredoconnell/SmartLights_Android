@@ -5,19 +5,20 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
-import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
+import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
 const val REQUEST_LOCATION_PERMISSION = 100
 
-class MainActivity : AppCompatActivity(), ControllersFragment.OnFragmentInteractionListener,
+class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentInteractionListener,
     BluetoothFragment.OnFragmentInteractionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity(), ControllersFragment.OnFragmentInteract
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         requestLocationPermission()
     }
 

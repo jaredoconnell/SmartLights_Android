@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:pikolo="http://schemas.android.com/tools">
+
+    <com.madrapps.pikolo.HSLColorPicker
+        android:id="@+id/colorPicker"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:padding="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        pikolo:lightness_indicator_stroke_width="0dp"
+        pikolo:arc_length="110"
+        pikolo:hue_start_angle="30"
+        pikolo:lightness_start_angle="270"
+        pikolo:radius_offset="20dp"
+        pikolo:saturation_indicator_stroke_color="@color/colorPrimary"
+        pikolo:saturation_start_angle="150"/>
+
+    <ImageView
+        android:id="@+id/color_picker_preview_background"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_circle"
+        app:layout_constraintBottom_toBottomOf="@+id/colorPicker"
+        app:layout_constraintEnd_toEndOf="@+id/colorPicker"
+        app:layout_constraintStart_toStartOf="@+id/colorPicker"
+        app:layout_constraintTop_toTopOf="@+id/colorPicker"
+        android:contentDescription="@string/the_color_preview" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

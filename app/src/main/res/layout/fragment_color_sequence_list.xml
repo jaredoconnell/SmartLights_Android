@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        android:id="@+id/text_controllers"
+        android:id="@+id/color_sequences_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -16,26 +16,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/controller_list_message" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_below="@id/text_controllers"/>
-
+        android:text="@string/color_sequences" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list_controllers"
+        android:id="@+id/list_color_sequences"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:layout_below="@id/text_controllers"
+        android:layout_below="@id/color_sequences_title"
+        android:paddingBottom="60dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/controllers_floating_action_button"
+        android:id="@+id/add_color_sequence"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"

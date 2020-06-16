@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import com.welie.blessed.BluetoothPeripheral
 import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.ClickListener
 import net.shadowxcraft.smartlights.MainActivity
@@ -43,21 +44,28 @@ class BluetoothFragment : Fragment(), ClickListener {
     private var listener: OnFragmentInteractionListener? = null
     private var scanner: BluetoothLeScanner? = null
     private var scanCallback: ScanCallbackImpl = ScanCallbackImpl()
-    private var foundBluetoothDevices: ArrayList<BluetoothDevice> = ArrayList()
+    private var foundBluetoothDevices: ArrayList<BluetoothPeripheral> = ArrayList()
     private var adapter: BluetoothListAdapter? = null
 
-    inner class ScanCallbackImpl : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult ) {
-            Log.println(Log.INFO, "BluetoothFragment", "Got result! " + result.device.name)
-            val device = result.device
-            if(!foundBluetoothDevices.contains(device)) { // new
-                foundBluetoothDevices.add(device)
+    inner class ScanCallbackImpl : ScanCallback(), BLEControllerManager.BluetoothScanListener {
+        override fun onPeripheralDiscovered(peripheral: BluetoothPeripheral,
+                                            status: ScanResult)
+        {
+            if(!containsDevice(peripheral)) { // new
+                foundBluetoothDevices.add(peripheral)
                 adapter!!.notifyItemInserted(foundBluetoothDevices.size - 1);
             }
         }
 
-        override fun onScanFailed(errorCode: Int) {
-            super.onScanFailed(errorCode)
+        private fun containsDevice(newDevice: BluetoothPeripheral): Boolean {
+            for (device in foundBluetoothDevices) {
+                if (device.address == newDevice.address)
+                    return true
+            }
+            return false
+        }
+
+        override fun onScanFailed() {
             Log.println(Log.WARN, "BluetoothFragment", "Failed.")
         }
     }
@@ -69,9 +77,9 @@ class BluetoothFragment : Fragment(), ClickListener {
             param2 = it.getString(ARG_PARAM2)
         }
         if(BLEControllerManager.supportsBluetooth()) {
-            scanner = BLEControllerManager.getBLEScanner()
             Log.println(Log.INFO, "BluetoothFragment", "Starting bluetooth scan.")
-            scanner!!.startScan(scanCallback)
+            BLEControllerManager.setScanListener(scanCallback)
+            BLEControllerManager.startScan()
         }
     }
 
@@ -100,7 +108,7 @@ class BluetoothFragment : Fragment(), ClickListener {
         rvDevices.layoutManager = LinearLayoutManager(context)
 
         if(!BLEControllerManager.supportsBluetooth()) {
-            view.findViewById<TextView>(R.id.bluetooth_textview).text = "Bluetooth Not Supported"
+            view.findViewById<TextView>(R.id.bluetooth_textview).text = getString(R.string.bluetooth_not_supported)
         }
 
         return view
@@ -125,6 +133,7 @@ class BluetoothFragment : Fragment(), ClickListener {
     }
 
     override fun onDestroy() {
+        BLEControllerManager.endScan()
         super.onDestroy()
     }
 

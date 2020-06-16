@@ -7,13 +7,30 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="char_uuid_emergency">919ccec1-19b4-4880-9393-0cd90b55e0cd</string>
-    <string name="char_uuid_emergency_call">88168783-7d69-48af-9519-1e3ab5849f44</string>
-    <string name="char_uuid_missed_calls">2b4a6f4f-6cfe-4c5c-9141-ca816a004a0e</string>
-    <string name="bluetooth_scanner_message">Scanning for nearby devices...</string>
-    <string name="add_controllers">Controllers</string>
+    <string name="bluetooth_scanner_message">Scanning for nearby devices…</string>
+    <string name="controller_list_message">Tap on a controller to add an LED Strip\nOr tap on the + to connect to a controller.</string>
     <string name="on_connection_title">Successfully Connected</string>
     <string name="name_controller">Please name the controller.</string>
     <string name="name_controller_field">Controller Name</string>
     <string name="set">Set</string>
+    <string name="add_led_strip">Add LED Strip</string>
+    <string name="finish_adding_led_strip_component">Add Component</string>
+    <string name="add_led_strip_component">New LED Strip Component</string>
+    <string name="pin">Pin:</string>
+    <string name="driver">Driver:</string>
+    <string name="color_pick_text">"Color: "</string>
+    <string name="bluetooth_not_supported">Bluetooth Not Supported</string>
+    <string name="add_pwm_driver">Add PWM Driver</string>
+    <string name="pwm_driver_id">PWM Controller ID:</string>
+    <string name="cancel">Cancel</string>
+    <string name="driver_id">Driver ID:</string>
+    <string name="address">Address</string>
+    <string name="connect">Connect</string>
+    <string name="set_colors">Set Colors</string>
+    <string name="color_sequences" >Color Sequences</string>
+    <string name="edit">Edit</string>
+    <string name="edit_color_sequence">Edit Color Sequence</string>
+    <string name="name_color_sequence_field">Color Sequence Name</string>
+    <string name="the_color_preview">The color preview</string>
+    <string name="color_preview_view_explanation">A preview of the color</string>
 </resources>

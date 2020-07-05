@@ -22,10 +22,12 @@
         android:id="@+id/new_led_strip_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapWords"
-        android:hint="@string/name_controller_field"
+        android:layout_below="@+id/text_controllers"
         android:autofillHints=""
-        android:layout_below="@+id/text_controllers">
+        android:hint="@string/name_led_strip_field"
+        android:inputType="textCapWords"
+        android:maxLength="30">
+
         <requestFocus />
     </EditText>
 

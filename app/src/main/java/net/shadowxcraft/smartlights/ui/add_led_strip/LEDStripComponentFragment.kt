@@ -157,7 +157,7 @@ class LEDStripComponentFragment(private val controller: ESP32) : Fragment() {
                 else -> {
                     val nextID = controller.getNextLEDStripID()
                     val newStrip = LEDStrip(nextID, name, components, null, controller)
-                    controller.addLEDStrip(newStrip)
+                    controller.addLEDStrip(newStrip, true)
                     (context as MainActivity).supportFragmentManager.popBackStack()
                 }
             }

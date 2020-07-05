@@ -4,7 +4,7 @@ import net.shadowxcraft.smartlights.ESP32
 import net.shadowxcraft.smartlights.LEDStrip
 import net.shadowxcraft.smartlights.PWMDriver
 
-class AddLEDStripDriverPacket(controller: ESP32, private val strip: LEDStrip) : SendablePacket(controller) {
+class AddLEDStripPacket(controller: ESP32, private val strip: LEDStrip) : SendablePacket(controller) {
     override fun send() {
         val output = ArrayList<Byte>();
         output.add(5) // packet ID 5

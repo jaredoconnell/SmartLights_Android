@@ -11,9 +11,11 @@ import android.widget.Toast
 import androidx.core.util.containsKey
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
-import net.shadowxcraft.smartlights.packets.AddLEDStripDriverPacket
-import net.shadowxcraft.smartlights.packets.AddPWMDriverPacket
+import net.shadowxcraft.smartlights.packets.*
 import java.nio.charset.Charset
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 const val DEFAULT_NAME: String = "New Device"
 
@@ -32,13 +34,23 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
      * Adds a controller.
      * @throws IllegalStateException if a controller with the same address is there.
      */
-    fun addPWMDriver(pwmDriver: PWMDriver) {
+    fun addPWMDriver(pwmDriver: PWMDriver, sendPacket: Boolean) {
         //if(pwmDrivers.containsKey(pwmDriver.i2cAddress))
         //        throw IllegalStateException("Controller with same address already exists.")
         pwmDrivers.append(pwmDriver.i2cAddress, pwmDriver)
         Log.println(Log.INFO, "ESP32", "Adding PWM driver "
                 + pwmDriver.i2cAddress.toString() + " Is still connected: " + BLEControllerManager.bluetoothCentral?.connectedPeripherals.toString())
-        AddPWMDriverPacket(this, pwmDriver).send()
+
+        if (sendPacket)
+            AddPWMDriverPacket(this, pwmDriver).send()
+    }
+
+    fun getPWMDriver(address: Int) : PWMDriver? {
+        return if (pwmDrivers.containsKey(address)) {
+            pwmDrivers[address]
+        } else {
+            null;
+        }
     }
 
     fun getNextLEDStripID() : Int {
@@ -54,7 +66,7 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
     /**
      * Stores the LED strip, then sends the LED strip to the controller.
      */
-    fun addLEDStrip(strip: LEDStrip) {
+    fun addLEDStrip(strip: LEDStrip, sendPacket: Boolean) {
         if (nextLEDStripID < strip.id) {
             nextLEDStripID = strip.id + 1
         }
@@ -63,10 +75,11 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
         }
         ledStrips.put(strip.id, strip)
 
-        AddLEDStripDriverPacket(this, strip).send()
+        if (sendPacket)
+            AddLEDStripPacket(this, strip).send()
     }
 
-    fun checkName(listener: BLEControllerManager.BluetoothConnectionListener?) {
+    private fun checkName(listener: BLEControllerManager.BluetoothConnectionListener?) {
         if (name == DEFAULT_NAME) {
             val builder = AlertDialog.Builder(act)
             val inflater = act.layoutInflater;
@@ -87,6 +100,29 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
                 }.show()
         }
     }
+
+    fun onConnection() {
+        // Makes sure proper communication is possible, then makes sure it's all up to date.
+        device?.requestMtu(512)
+        checkName(BLEControllerManager.externConnectionListener)
+
+        val exec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+
+        exec.schedule({
+            // Delay in case the requested mtu has not applied.
+            requestDataFromDriver()
+        }, 2, TimeUnit.SECONDS)
+    }
+
+    private fun requestDataFromDriver() {
+        GetPWMDrivers(this).send();
+        GetLEDStrips(this).send();
+        GetColorSequences(this).send();
+    }
+
+    /*
+     * Bluetooth events
+     */
 
     override fun onCharacteristicWrite(
         peripheral: BluetoothPeripheral?,
@@ -133,6 +169,17 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
         device!!.readCharacteristic(characteristic)
     }
 
+    @ExperimentalUnsignedTypes
+    private fun getPacket(value: ByteArray) : ReceivedPacket {
+        return when(value[0].toUByte().toInt()) {
+            255 -> PWMDriversListResponse(this, value)
+            254 -> LEDStripsListResponse(this, value)
+            252 -> LEDStripColorSequenceListResponse(this, value)
+            251 -> ColorSequenceListResponse(this, value)
+            else -> throw IllegalStateException("Unknown packet ID ${value[0].toInt()}")
+        }
+    }
+
     /**
      * Callback invoked as the result of a characteristic read operation or notification
      *
@@ -150,8 +197,10 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
         characteristic: BluetoothGattCharacteristic?,
         status: Int
     ) {
-        val dataAsStr = String(value!!, Charset.defaultCharset())
-        Log.println(Log.INFO, "ESP32", "onCharacteristicUpdate $dataAsStr " + value.size)
+        Log.println(Log.INFO, "ESP32", "onCharacteristicUpdate got packet!")
+        val packet: ReceivedPacket? = value?.let { getPacket(it) }
+        Log.println(Log.INFO, "ESP32", "Packet: " + packet?.javaClass?.name)
+        packet?.process()
         /*Toast.makeText(
             BLEControllerManager.activity,
             "Got data " + dataAsStr,
@@ -201,6 +250,11 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
      */
     override fun onBondingStarted(peripheral: BluetoothPeripheral?) {
         Log.println(Log.INFO, "ESP32", "onBondingStarted")
+        Toast.makeText(
+            BLEControllerManager.activity,
+            "Bonding started",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /**
@@ -210,6 +264,11 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
      */
     override fun onBondingSucceeded(peripheral: BluetoothPeripheral?) {
         Log.println(Log.INFO, "ESP32", "onBondingSucceeded")
+        Toast.makeText(
+            BLEControllerManager.activity,
+            "Bonding succeeded",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /**
@@ -219,6 +278,11 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
      */
     override fun onBondingFailed(peripheral: BluetoothPeripheral?) {
         Log.println(Log.INFO, "ESP32", "onBondingFailed")
+        Toast.makeText(
+            BLEControllerManager.activity,
+            "Bonding failed",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /**
@@ -228,6 +292,11 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
      */
     override fun onBondLost(peripheral: BluetoothPeripheral?) {
         Log.println(Log.INFO, "ESP32", "onBondLost")
+        Toast.makeText(
+            BLEControllerManager.activity,
+            "Bond lost",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /**

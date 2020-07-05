@@ -140,7 +140,7 @@ class ControllersFragment : Fragment(), BLEControllerManager.BluetoothConnection
             .setView(view).setNegativeButton("Cancel", null).setPositiveButton("Add") { _: DialogInterface?, _: Int ->
                 val driverAddr: Int = addressSelector.value
 
-                device.addPWMDriver(PWMDriver(driverAddr))
+                device.addPWMDriver(PWMDriver(driverAddr), true)
             }.show()
 
 

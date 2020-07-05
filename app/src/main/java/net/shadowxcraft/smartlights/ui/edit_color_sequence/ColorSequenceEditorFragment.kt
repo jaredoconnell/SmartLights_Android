@@ -109,7 +109,8 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                     colorSequence.transitionTime += transitionTimeTicksView.value
                     colorSequence.name = name
 
-                    if (colorSequence.sustainTime + colorSequence.transitionTime <= 0) {
+                    if ((colorSequence.sustainTime + colorSequence.transitionTime <= 0)
+                        && colorSequence.colors.size > 1) {
                         Toast.makeText(
                             BLEControllerManager.activity,
                             "Please add a transition or sustain time greater than 0.",
@@ -124,6 +125,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                         AddColorSequencePacket(controller, colorSequence).send()
 
                         if (ledstrip != null) {
+                            ledstrip.currentSeq = colorSequence
                             SetColorSequenceForLEDStripPacket(ledstrip).send()
                         }
 
@@ -167,9 +169,11 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
             // Set to existing color
             colorSequence.colors[colorIndex].toArgb()
         } else {
-            android.graphics.Color.WHITE
+            android.graphics.Color.RED
         }
         colorPicker.setColor(lastColor)
+        backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
+
 
         colorPicker.setColorSelectionListener(object : SimpleColorSelectionListener() {
             override fun onColorSelected(color: Int) {

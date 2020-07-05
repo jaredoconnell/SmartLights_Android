@@ -33,4 +33,5 @@
     <string name="name_color_sequence_field">Color Sequence Name</string>
     <string name="the_color_preview">The color preview</string>
     <string name="color_preview_view_explanation">A preview of the color</string>
+    <string name="name_led_strip_field">LED Strip Name</string>
 </resources>

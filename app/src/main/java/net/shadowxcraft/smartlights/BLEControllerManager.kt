@@ -71,12 +71,15 @@ object BLEControllerManager : BluetoothCentralCallback() {
         if(device.address in connected) {
             val controller = connected[device.address]
             bluetoothCentral!!.connectPeripheral(controller!!.device, controller)
+            if (device.bondState == BluetoothPeripheral.BOND_NONE)
+                device.createBond()
             return false
         } else {
             val newController = ESP32(this.activity!!)
             newController.device = device
             connected[device.address] = newController
             bluetoothCentral!!.connectPeripheral(newController.device, newController)
+            device.createBond()
             activity?.runOnUiThread {
                 Toast.makeText(
                     activity,
@@ -116,8 +119,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
             ControllerManager.controllers.add(controller)
             externConnectionListener?.onControllerChange(controller)
         }
-        controller?.checkName(externConnectionListener)
-        peripheral.requestMtu(512)
+        controller!!.onConnection()
     }
 
     override fun onConnectionFailed(peripheral: BluetoothPeripheral?, status: Int) {

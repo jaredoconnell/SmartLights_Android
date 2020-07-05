@@ -28,7 +28,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_controllers"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:clipToPadding="false"
         android:layout_below="@id/text_controllers"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>

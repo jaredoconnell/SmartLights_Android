@@ -84,7 +84,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/color_sequence_colors"
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:layout_below="@id/item_color_sequence_preview"
                 android:paddingBottom="60dp"

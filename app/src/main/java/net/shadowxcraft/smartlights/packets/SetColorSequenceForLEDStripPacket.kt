@@ -14,8 +14,8 @@ class SetColorSequenceForLEDStripPacket(private val ledStrip: LEDStrip) : Sendab
         } else {
             ledStrip.currentSeq!!.id
         }
-        output.addAll(shortToByteList(id))
         output.addAll(shortToByteList(ledStrip.id))
+        output.addAll(shortToByteList(id))
         sendData(output.toByteArray())
 
     }

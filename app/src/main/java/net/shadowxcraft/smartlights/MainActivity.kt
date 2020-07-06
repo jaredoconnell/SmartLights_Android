@@ -3,6 +3,7 @@ package net.shadowxcraft.smartlights
 import android.Manifest
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -15,6 +16,7 @@ import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
+import java.lang.Exception
 
 const val REQUEST_LOCATION_PERMISSION = 100
 
@@ -75,5 +77,32 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         Toast.makeText(this, "Starting bluetooth..", Toast.LENGTH_SHORT).show()
 
         BLEControllerManager.init(this)
+
+        Handler().postDelayed({
+            connectToDevices()
+        }, 2000)
+    }
+
+    private fun connectToDevices() {
+        val db = SQLiteDB(this)
+        try {
+            db.writableDatabase
+            val database = db.readableDatabase
+            val selectedCols = arrayOf(CONTROLLER_COLUMN_ADDRESS, CONTROLLER_COLUMN_NAME)
+            val cursor = database.query(
+                CONTROLLER_TABLE_NAME,
+                selectedCols,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+            while (cursor.moveToNext()) {
+                BLEControllerManager.attemptToConnectToAddr(cursor.getString(0))
+            }
+        } catch (any: Exception) {
+
+        }
     }
 }

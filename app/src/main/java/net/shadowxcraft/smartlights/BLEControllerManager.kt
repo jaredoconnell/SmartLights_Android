@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanResult
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -67,6 +68,11 @@ object BLEControllerManager : BluetoothCentralCallback() {
         bluetoothCentral?.stopScan()
     }
 
+    fun attemptToConnectToAddr(addr: String) {
+        val peripheral = bluetoothCentral!!.getPeripheral(addr)
+        connectTo(peripheral)
+    }
+
     fun connectTo(device: BluetoothPeripheral): Boolean {
         if(device.address in connected) {
             val controller = connected[device.address]
@@ -118,6 +124,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
         if (controller != null && !ControllerManager.controllers.contains(controller)) {
             ControllerManager.controllers.add(controller)
             externConnectionListener?.onControllerChange(controller)
+            controller.saveToDB(activity!!)
         }
         controller!!.onConnection()
     }

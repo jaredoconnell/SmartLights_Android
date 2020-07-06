@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.content.ContentValues
+import android.content.Context
 import android.util.Log
 import android.util.SparseArray
 import android.widget.EditText
@@ -106,9 +108,10 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
                         this.name = DEFAULT_NAME
 
                     listener?.onControllerChange(this)
+                    saveToDB(BLEControllerManager.activity!!)
                     Toast.makeText(
                         BLEControllerManager.activity,
-                        "Saved to RAM",
+                        "Saved to DB",
                         Toast.LENGTH_SHORT
                     ).show()
                 }.show()
@@ -133,6 +136,14 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
         GetColorSequences(this).send();
         GetPWMDrivers(this).send();
         GetLEDStrips(this).send();
+    }
+
+    fun saveToDB(context: Context) {
+        val database = SQLiteDB(context).getWritableDatabase()
+        val values = ContentValues()
+        values.put(CONTROLLER_COLUMN_ADDRESS, device!!.address.toString())
+        values.put(CONTROLLER_COLUMN_NAME, name)
+        database.insert(CONTROLLER_TABLE_NAME, null, values)
     }
 
     /*

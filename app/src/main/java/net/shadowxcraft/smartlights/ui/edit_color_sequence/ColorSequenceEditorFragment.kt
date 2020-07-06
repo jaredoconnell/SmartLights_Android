@@ -118,11 +118,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                         ).show()
                     } else {
 
-                        if (!controller.colorsSequences.contains(colorSequence.id)) {
-                            controller.colorsSequences[colorSequence.id] = colorSequence
-                        }
-
-                        AddColorSequencePacket(controller, colorSequence).send()
+                        controller.addColorSequence(colorSequence, true)
 
                         if (ledstrip != null) {
                             ledstrip.currentSeq = colorSequence

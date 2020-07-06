@@ -4,9 +4,24 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ScrollView
+    <TextView
+        android:id="@+id/text_controllers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/edit_color_sequence" />
+
+    <androidx.core.widget.NestedScrollView
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_below="@id/text_controllers">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,7 +67,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Transition Time (Minutes:Seconds:60ths)"/>
+                    android:text="@string/transition_time_editor_title"/>
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -76,35 +91,18 @@
             <ImageView
                 android:id="@+id/item_color_sequence_preview"
                 android:layout_width="match_parent"
-                android:layout_below="@id/color_sequence_timing_fields"
-                android:layout_height="40dp"/>
-
-
+                android:layout_height="40dp"
+                android:contentDescription="@string/preview" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/color_sequence_colors"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:layout_below="@id/item_color_sequence_preview"
                 android:paddingBottom="60dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
         </LinearLayout>
-    </ScrollView>
-
-    <TextView
-        android:id="@+id/text_controllers"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/edit_color_sequence" />
+    </androidx.core.widget.NestedScrollView>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -1,9 +1,6 @@
 package net.shadowxcraft.smartlights.packets
 
-import net.shadowxcraft.smartlights.Color
-import net.shadowxcraft.smartlights.ESP32
-import net.shadowxcraft.smartlights.LEDStrip
-import net.shadowxcraft.smartlights.LEDStripComponent
+import net.shadowxcraft.smartlights.*
 
 abstract class ReceivedPacket(protected val controller: ESP32, private val bytes: ByteArray) {
     private var index = 1 // skip 0, the packet ID
@@ -11,11 +8,11 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
     abstract fun process()
 
     protected fun getByte() : Int {
-        return bytes[index++].toInt()
+        return bytes[index++].toUByte().toInt()
     }
 
     protected fun getShort() : Int {
-        return bytes[index++].toInt() * 256 + bytes[index++]
+        return getByte() * 256 + getByte()
     }
 
     protected fun bytesToStr() : String {
@@ -28,9 +25,9 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
     }
 
     protected fun bytesToColor() : Color {
-        val red: Int = bytes[0 + index++].toInt()
-        val green: Int = bytes[1 + index++].toInt()
-        val blue: Int = bytes[2 + index++].toInt()
+        val red: Int = getByte()
+        val green: Int = getByte()
+        val blue: Int = getByte()
 
         return Color(red, green, blue)
     }
@@ -48,5 +45,28 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         val name = bytesToStr()
         // TODO: Instead of null current sequence, get it.
         return LEDStrip(id, name, components, null, controller)
+    }
+
+    protected fun bytesToColorSequence() : ColorSequence {
+        val id = getShort()
+        val numItems = getByte()
+        val sequenceType = getByte()
+        val sustainTime = getShort()
+        val transitionTime = getShort()
+        val transitionType = getByte()
+
+        val colors = ArrayList<Color>()
+        for (i in 0 until numItems) {
+            colors.add(bytesToColor())
+        }
+        val name = bytesToStr()
+
+        val colorSequence = ColorSequence(id, name)
+        colorSequence.colors.addAll(colors)
+        //colorSequence.sequenceType = sequenceType
+        colorSequence.sustainTime = sustainTime
+        colorSequence.transitionTime = transitionTime
+        //colorSequence.transitionType = transitionType.toByte()
+        return colorSequence
     }
 }

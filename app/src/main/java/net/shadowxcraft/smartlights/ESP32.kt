@@ -8,7 +8,9 @@ import android.util.Log
 import android.util.SparseArray
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.util.contains
 import androidx.core.util.containsKey
+import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
 import net.shadowxcraft.smartlights.packets.*
@@ -67,7 +69,7 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
      * Stores the LED strip, then sends the LED strip to the controller.
      */
     fun addLEDStrip(strip: LEDStrip, sendPacket: Boolean) {
-        if (nextLEDStripID < strip.id) {
+        if (nextLEDStripID <= strip.id) {
             nextLEDStripID = strip.id + 1
         }
         if (ledStrips.containsKey(strip.id)) {
@@ -77,6 +79,18 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
 
         if (sendPacket)
             AddLEDStripPacket(this, strip).send()
+    }
+
+    fun addColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
+        if (nextColorSequenceID <= colorSequence.id) {
+            nextColorSequenceID = colorSequence.id + 1
+        }
+        //if (!colorsSequences.contains(colorSequence.id)) {
+        colorsSequences[colorSequence.id] = colorSequence
+        //}
+
+        if (sendPacket)
+            AddColorSequencePacket(this, colorSequence).send()
     }
 
     private fun checkName(listener: BLEControllerManager.BluetoothConnectionListener?) {
@@ -115,9 +129,10 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
     }
 
     private fun requestDataFromDriver() {
+        // This is the order they should be sent to prevent issues with missing components.
+        GetColorSequences(this).send();
         GetPWMDrivers(this).send();
         GetLEDStrips(this).send();
-        GetColorSequences(this).send();
     }
 
     /*

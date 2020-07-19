@@ -2,7 +2,6 @@ package net.shadowxcraft.smartlights.ui.colors
 
 import android.content.Context
 import android.os.Bundle
-import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -67,13 +65,18 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
 
     override fun onButtonClicked(position: Int) {
         // Open the editor for an existing color
+
+        val keyAtPosition = strip!!.controller.colorsSequences.keyAt(position)
+        val selectedSequence = strip.controller.colorsSequences.get(keyAtPosition)
+
         Utils.replaceFragment(ColorSequenceEditorFragment(requireActivity(),
-            strip!!.controller.colorsSequences[position], strip.controller, strip), parentFragmentManager)
+            selectedSequence, strip.controller, strip), parentFragmentManager)
     }
 
     override fun onPositionClicked(position: Int) {
         // Set the color sequence for the LED strip
-        strip!!.currentSeq = strip.controller.colorsSequences[position]
+        val keyAtPosition = strip!!.controller.colorsSequences.keyAt(position)
+        strip.currentSeq = strip.controller.colorsSequences.get(keyAtPosition)
         SetColorSequenceForLEDStripPacket(strip).send()
     }
 }
@@ -83,7 +86,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
 class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListener,
-                            val buttonClickListener: ButtonClickListener)
+                            private val buttonClickListener: ButtonClickListener)
     : RecyclerView.Adapter<ColorsListListAdapter.ViewHolder?>()
 {
 
@@ -124,7 +127,8 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // Get the data model based on position
-        val sequence: ColorSequence = controller.colorsSequences[position]
+        val keyAtPosition = controller.colorsSequences.keyAt(position)
+        val sequence: ColorSequence = controller.colorsSequences.get(keyAtPosition)
 
         // Set item views based on your views and data model
         holder.nameView.text = sequence.name

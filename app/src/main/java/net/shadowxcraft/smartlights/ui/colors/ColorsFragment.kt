@@ -59,7 +59,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
             // Set layout manager to position the items
             rvControllers.layoutManager = LinearLayoutManager(context)
         } else {
-            activity?.supportFragmentManager?.popBackStackImmediate();
+            activity?.supportFragmentManager?.popBackStack();
         }
 
         return currentView

@@ -139,11 +139,11 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
     }
 
     fun saveToDB(context: Context) {
-        val database = SQLiteDB(context).getWritableDatabase()
+        val database = SQLiteDB(context).writableDatabase
         val values = ContentValues()
         values.put(CONTROLLER_COLUMN_ADDRESS, device!!.address.toString())
         values.put(CONTROLLER_COLUMN_NAME, name)
-        database.insert(CONTROLLER_TABLE_NAME, null, values)
+        database.replace(CONTROLLER_TABLE_NAME, null, values)
     }
 
     /*

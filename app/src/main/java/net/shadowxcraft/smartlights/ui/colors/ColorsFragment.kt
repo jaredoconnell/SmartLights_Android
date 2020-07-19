@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,8 +18,10 @@ import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.edit_color_sequence.ColorSequenceEditorFragment
 
-class ColorsFragment(private val strip: LEDStrip): Fragment(), ButtonClickListener, ClickListener {
+class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListener, ClickListener {
     private var adapter: ColorsListListAdapter? = null
+
+    constructor() : this(null)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,28 +29,38 @@ class ColorsFragment(private val strip: LEDStrip): Fragment(), ButtonClickListen
         savedInstanceState: Bundle?
     ): View? {
         val currentView: View = inflater.inflate(R.layout.fragment_color_sequence_list, container, false)
-        val addButton: View = currentView.findViewById(R.id.add_color_sequence)
-        addButton.setOnClickListener {
-            // Open the color editor for a new color
-            Utils.replaceFragment(ColorSequenceEditorFragment(requireActivity(),
-                ColorSequence(strip.controller.getNextColorStripID(), "New Color Sequence"), strip.controller, strip), parentFragmentManager)
+        if (strip != null) {
+            val addButton: View = currentView.findViewById(R.id.add_color_sequence)
+            addButton.setOnClickListener {
+                // Open the color editor for a new color
+                Utils.replaceFragment(
+                    ColorSequenceEditorFragment(
+                        requireActivity(),
+                        ColorSequence(strip.controller.getNextColorStripID(), "New Color Sequence"),
+                        strip.controller,
+                        strip
+                    ), parentFragmentManager
+                )
+            }
+            // Create adapter passing in the led strip components
+            adapter = ColorsListListAdapter(strip.controller, this, this)
+
+            // Lookup the recyclerview in activity layout
+            val rvControllers = currentView.findViewById(R.id.list_color_sequences) as RecyclerView
+            rvControllers.setHasFixedSize(true)
+            val itemDecoration: RecyclerView.ItemDecoration =
+                DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
+            rvControllers.addItemDecoration(itemDecoration)
+
+
+            // Attach the adapter to the recyclerview to populate items
+            rvControllers.adapter = adapter
+
+            // Set layout manager to position the items
+            rvControllers.layoutManager = LinearLayoutManager(context)
+        } else {
+            activity?.supportFragmentManager?.popBackStackImmediate();
         }
-        // Create adapter passing in the led strip components
-        adapter = ColorsListListAdapter(strip.controller, this, this)
-
-        // Lookup the recyclerview in activity layout
-        val rvControllers = currentView.findViewById(R.id.list_color_sequences) as RecyclerView
-        rvControllers.setHasFixedSize(true)
-        val itemDecoration: RecyclerView.ItemDecoration =
-            DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
-        rvControllers.addItemDecoration(itemDecoration)
-
-
-        // Attach the adapter to the recyclerview to populate items
-        rvControllers.adapter = adapter
-
-        // Set layout manager to position the items
-        rvControllers.layoutManager = LinearLayoutManager(context)
 
         return currentView
     }
@@ -55,12 +68,12 @@ class ColorsFragment(private val strip: LEDStrip): Fragment(), ButtonClickListen
     override fun onButtonClicked(position: Int) {
         // Open the editor for an existing color
         Utils.replaceFragment(ColorSequenceEditorFragment(requireActivity(),
-            strip.controller.colorsSequences[position], strip.controller, strip), parentFragmentManager)
+            strip!!.controller.colorsSequences[position], strip.controller, strip), parentFragmentManager)
     }
 
     override fun onPositionClicked(position: Int) {
         // Set the color sequence for the LED strip
-        strip.currentSeq = strip.controller.colorsSequences[position]
+        strip!!.currentSeq = strip.controller.colorsSequences[position]
         SetColorSequenceForLEDStripPacket(strip).send()
     }
 }

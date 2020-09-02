@@ -12,9 +12,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.NumberPicker
 import android.widget.Toast
-import androidx.core.util.contains
-import androidx.core.util.containsValue
-import androidx.core.util.set
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +20,6 @@ import com.madrapps.pikolo.HSLColorPicker
 import com.madrapps.pikolo.listeners.SimpleColorSelectionListener
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.R.layout
-import net.shadowxcraft.smartlights.packets.AddColorSequencePacket
 import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
 
 
@@ -151,7 +147,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
         return currentView
     }
 
-    override fun onButtonClicked(position: Int) {
+    override fun onButtonClicked(position: Int, itemId: Int) {
         displayColorEditor(position)
     }
 

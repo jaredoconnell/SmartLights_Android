@@ -33,6 +33,8 @@ class LEDStripComponentFragment(private val controller: ESP32) : Fragment() {
 
     private var components: ArrayList<LEDStripComponent> = ArrayList()
     private var colors: HashMap<String, Color> = HashMap()
+    private var esp32Pins: HashMap<String, Int> = HashMap()
+    private var pwmDriverPins: HashMap<String, Int> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,11 +48,31 @@ class LEDStripComponentFragment(private val controller: ESP32) : Fragment() {
         colors["4000k"] = Color(4000, 4095)
         colors["5000k"] = Color(5000, 4095)
         colors["6500k"] = Color(6500, 4095)
+
+        esp32Pins["RX2"] = 16
+        esp32Pins["TX2"] = 17
+        esp32Pins["D18"] = 18
+        esp32Pins["D19"] = 19
+        esp32Pins["D21"] = 21
+        esp32Pins["D22"] = 22
+        esp32Pins["D23"] = 23
+        esp32Pins["D25"] = 25
+        esp32Pins["D26"] = 26
+        esp32Pins["D27"] = 27
+        esp32Pins["D32"] = 32
+        esp32Pins["D33"] = 33
+
+        for (x in 0..15) {
+            pwmDriverPins[x.toString()] = x
+        }
     }
 
-    private fun pinAlreadyInUse(pin: Int, driver: PWMDriver) : Boolean {
+    /**
+     * Null driver means the ESP32.
+     */
+    private fun pinAlreadyInUse(pin: Int, driver: PWMDriver?) : Boolean {
         for (component in components) {
-            if (component.driverPin == pin)
+            if (component.driver == driver && component.driverPin == pin)
                 return true
         }
         for (strip in controller.ledStrips.valueIterator()) {
@@ -72,27 +94,30 @@ class LEDStripComponentFragment(private val controller: ESP32) : Fragment() {
         addButton.setOnClickListener {
             val builder = AlertDialog.Builder(this.activity)
             val view = inflater.inflate(layout.new_led_strip_component, null)
-            val pinSelector: NumberPicker = view.findViewById(R.id.led_strip_pin_selector)
+            val pinSelector: Spinner = view.findViewById(R.id.led_strip_pin_selector)
             val colorSelector: Spinner = view.findViewById(R.id.color_picker_spinner)
             val driverSelector: Spinner = view.findViewById(R.id.driver_picker_spinner)
-            pinSelector.minValue = 0
-            pinSelector.maxValue = 15
 
-            val colorValues = arrayOf(
-                "Red", "Green", "Blue", "3200k", "4000k", "5000k", "6500k"
+            val pinValues = ArrayList<String>()
+            val pinAdapter : ArrayAdapter<String> = ArrayAdapter(
+                this.requireContext(),
+                android.R.layout.simple_spinner_item,
+                pinValues
             )
+            pinSelector.adapter = pinAdapter
+
             val colorAdapter: ArrayAdapter<String> = ArrayAdapter(
                 this.requireContext(),
                 android.R.layout.simple_spinner_item,
-                colorValues
+                colors.keys.toTypedArray()
             )
             colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             colorSelector.adapter = colorAdapter
 
-            val driverValues = Array(controller.pwmDrivers.size()) { "" }
-            var i = 0;
+            val driverValues = Array(controller.pwmDrivers.size() + 1) { "ESP32" }
+            var i = 1;
             for (keyAddr in controller.pwmDrivers.keyIterator()) {
-                driverValues[i++] = keyAddr.toString();
+                driverValues[i++] = keyAddr.toString()
             }
 
             val driverAdapter: ArrayAdapter<String> = ArrayAdapter(
@@ -102,7 +127,25 @@ class LEDStripComponentFragment(private val controller: ESP32) : Fragment() {
             )
             colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             driverSelector.adapter = driverAdapter
+            driverSelector.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    pinAdapter.clear()
+                }
 
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    if (driverValues[position] == "ESP32") {
+                        pinAdapter.addAll(esp32Pins.keys)
+                    } else {
+                        pinAdapter.addAll(pwmDriverPins.keys)
+                    }
+                }
+
+            }
 
             val dialog = builder.setView(view)
                 // Add action buttons
@@ -114,12 +157,22 @@ class LEDStripComponentFragment(private val controller: ESP32) : Fragment() {
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 button.setOnClickListener {
                     // First, validate the input
-                    val pin = pinSelector.value
+                    val pin = if (driverSelector.selectedItem as String == "ESP32") {
+                        esp32Pins[pinSelector.selectedItem as String]
+                    } else {
+                        pwmDriverPins[pinSelector.selectedItem as String]
+                    }
                     val driverID = (driverSelector.selectedItem as String).toInt()
-                    val driver = controller.pwmDrivers[driverID]
+                    val driver = controller.getPWMDriver(driverID)
                     val color = colors[colorSelector.selectedItem]
 
-                    if (pinAlreadyInUse(pin, driver)) {
+                    if (pin == null) {
+                        Toast.makeText(
+                            BLEControllerManager.activity,
+                            "Error getting pin.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (pinAlreadyInUse(pin, driver)) {
                         Toast.makeText(
                             BLEControllerManager.activity,
                             "Port already in use.",

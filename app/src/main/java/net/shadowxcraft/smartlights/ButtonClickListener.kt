@@ -1,5 +1,5 @@
 package net.shadowxcraft.smartlights
 
 interface ButtonClickListener {
-    fun onButtonClicked(position: Int)
+    fun onButtonClicked(position: Int, itemId: Int)
 }

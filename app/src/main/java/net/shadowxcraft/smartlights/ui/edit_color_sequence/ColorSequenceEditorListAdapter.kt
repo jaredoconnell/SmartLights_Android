@@ -1,17 +1,14 @@
 package net.shadowxcraft.smartlights.ui.edit_color_sequence
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.ButtonClickListener
 import net.shadowxcraft.smartlights.Color
-import net.shadowxcraft.smartlights.LEDStripComponent
 import net.shadowxcraft.smartlights.R
 
 
@@ -66,7 +63,7 @@ class ColorSequenceEditorListAdapter(private val colorsList: ArrayList<Color>,
         holder.colorView.setBackgroundColor(color.toArgb())
         holder.colorID.text = color.toString()
         holder.editButton.setOnClickListener {
-            editButtonClickListener.onButtonClicked(position)
+            editButtonClickListener.onButtonClicked(position, R.id.color_edit_button)
         }
     }
 }

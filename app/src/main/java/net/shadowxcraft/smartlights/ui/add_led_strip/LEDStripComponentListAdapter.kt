@@ -59,7 +59,10 @@ class LEDStripComponentListAdapter(private val componentList: ArrayList<LEDStrip
         // Set item views based on your views and data model
         val color = component.color
         holder.colorView.setBackgroundColor(color.toArgb())
-        holder.driverView.text = component.driver.i2cAddress.toString()
+        holder.driverView.text = if (component.driver == null)
+            "ESP32"
+        else
+            component.driver!!.i2cAddress.toString()
         holder.pinView.text = component.driverPin.toString()
     }
 }

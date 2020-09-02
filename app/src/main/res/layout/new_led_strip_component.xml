@@ -21,7 +21,7 @@
 
         <LinearLayout
             android:layout_weight="5"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_width="0dp">
             <TextView
@@ -43,6 +43,7 @@
                 android:id="@+id/driver_picker_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="5dp"
                 android:spinnerMode="dropdown"/>
         </LinearLayout>
         <LinearLayout
@@ -55,11 +56,11 @@
                 android:layout_height="wrap_content"
                 android:text="@string/pin"
                 android:textAlignment="center"/>
-            <NumberPicker
+            <Spinner
                 android:id="@+id/led_strip_pin_selector"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
+                android:spinnerMode="dropdown"
                 />
         </LinearLayout>
     </LinearLayout>

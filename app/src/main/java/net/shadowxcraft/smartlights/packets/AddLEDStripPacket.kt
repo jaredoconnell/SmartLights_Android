@@ -11,11 +11,14 @@ class AddLEDStripPacket(controller: ESP32, private val strip: LEDStrip) : Sendab
         output.addAll(shortToByteList(strip.id))
         output.add(strip.components.size.toByte())
         for (component in strip.components) {
-            output.add(component.driver.i2cAddress.toByte())
+            output.add(if (component.driver == null) 0 else component.driver!!.i2cAddress.toByte())
             output.add(component.driverPin.toByte())
             output.add(component.color.red.toByte())
             output.add(component.color.green.toByte())
             output.add(component.color.blue.toByte())
+            val curColorSequence = strip.currentSeq
+            val curColorSequenceID = curColorSequence?.id ?: 0
+            output.addAll(shortToByteList(curColorSequenceID))
         }
         output.addAll(strToByteList(strip.name));
 

@@ -12,8 +12,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
-import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentListAdapter
-import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
 
@@ -70,7 +68,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onButtonClicked(position: Int) {
+    override fun onButtonClicked(position: Int, itemId: Int) {
         val ledStrip = adapter!!.getNthLEDStrip(position)
         Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
     }
@@ -148,7 +146,7 @@ class LEDStripListAdapter(
             // Set item views based on your views and data model
         holder.nameView.text = component.name
         holder.colorsButtonView.setOnClickListener {
-            setColorClickListener.onButtonClicked(position)
+            setColorClickListener.onButtonClicked(position, R.id.set_colors_button)
         }
         /*holder.colorView.setBackgroundColor(android.graphics.Color.argb(255, color.red, color.green, color.blue))
         holder.driverView.text = component.driver.i2cAddress.toString()

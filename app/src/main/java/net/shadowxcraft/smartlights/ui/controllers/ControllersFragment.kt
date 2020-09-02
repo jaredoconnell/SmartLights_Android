@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
 import android.widget.Toast
-import androidx.core.util.isEmpty
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +29,7 @@ import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
  * create an instance of this fragment.
  */
 class ControllersFragment : Fragment(), BLEControllerManager.BluetoothConnectionListener,
-    ClickListener, ButtonClickListener
+    ButtonClickListener
 {
     //private var param1: String? = null
     private var adapter: ControllerListAdapter? = null
@@ -54,7 +53,7 @@ class ControllersFragment : Fragment(), BLEControllerManager.BluetoothConnection
         }
 
         // Create adapter passing in the sample user data
-        adapter = ControllerListAdapter(ControllerManager.controllers, this, this)
+        adapter = ControllerListAdapter(ControllerManager.controllers, this)
 
         // Lookup the recyclerview in activity layout
         val rvControllers = currentView.findViewById(R.id.list_controllers) as RecyclerView
@@ -115,33 +114,35 @@ class ControllersFragment : Fragment(), BLEControllerManager.BluetoothConnection
         adapter?.notifyDataSetChanged()
     }
 
-    override fun onPositionClicked(position: Int) {
+    override fun onButtonClicked(position: Int, itemId: Int) {
         val device = ControllerManager.controllers[position]
-        if (device.pwmDrivers.isEmpty()) {
-            Toast.makeText(
-                BLEControllerManager.activity,
-                "Please add a PWM Driver.",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            Utils.replaceFragment(LEDStripComponentFragment(device), parentFragmentManager)
+
+        when (itemId) {
+            R.id.add_pwm_driver_button -> {
+                val view = requireActivity().layoutInflater.inflate(layout.new_item_pwm_driver, null)
+                val addressSelector: NumberPicker = view.findViewById(R.id.pwm_driver_id_picker)
+                addressSelector.minValue = 64
+                addressSelector.maxValue = 120
+
+                AlertDialog.Builder(this.activity)
+                    .setView(view).setNegativeButton("Cancel", null)
+                    .setPositiveButton("Add") { _: DialogInterface?, _: Int ->
+                        val driverAddr: Int = addressSelector.value
+
+                        device.addPWMDriver(PWMDriver(driverAddr), true)
+                    }.show()
+            }
+            R.id.add_led_strip_button -> {
+                Utils.replaceFragment(LEDStripComponentFragment(device), parentFragmentManager)
+            }
+            else -> {
+                Toast.makeText(
+                    BLEControllerManager.activity,
+                    "Unknown button.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
-    }
-
-    override fun onButtonClicked(position: Int) {
-        val device = ControllerManager.controllers[position]
-
-        val view = requireActivity().layoutInflater.inflate(layout.new_item_pwm_driver, null)
-        val addressSelector: NumberPicker = view.findViewById(R.id.pwm_driver_id_picker)
-        addressSelector.minValue = 64
-        addressSelector.maxValue = 120
-
-        AlertDialog.Builder(this.activity)
-            .setView(view).setNegativeButton("Cancel", null).setPositiveButton("Add") { _: DialogInterface?, _: Int ->
-                val driverAddr: Int = addressSelector.value
-
-                device.addPWMDriver(PWMDriver(driverAddr), true)
-            }.show()
 
 
     }

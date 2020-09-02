@@ -31,8 +31,8 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
     val pwmDrivers: SparseArray<PWMDriver> = SparseArray<PWMDriver>()
     val ledStrips: SparseArray<LEDStrip> = SparseArray<LEDStrip>()
     val colorsSequences: SparseArray<ColorSequence> = SparseArray<ColorSequence>()
-    private var nextLEDStripID = 0
-    private var nextColorSequenceID = 0
+    private var nextLEDStripID = 1
+    private var nextColorSequenceID = 1
 
     /**
      * Adds a controller.

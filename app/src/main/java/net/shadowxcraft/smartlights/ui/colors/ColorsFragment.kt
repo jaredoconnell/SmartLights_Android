@@ -63,7 +63,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
         return currentView
     }
 
-    override fun onButtonClicked(position: Int) {
+    override fun onButtonClicked(position: Int, itemId: Int) {
         // Open the editor for an existing color
 
         val keyAtPosition = strip!!.controller.colorsSequences.keyAt(position)
@@ -135,7 +135,7 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
         holder.timeView.text = "Duration: ${sequence.getDuration()}s"
         holder.imgView.setImageDrawable(sequence.getDrawableRepresentation())
         holder.editButton.setOnClickListener {
-            buttonClickListener.onButtonClicked(position)
+            buttonClickListener.onButtonClicked(position, R.id.item_color_sequence_edit_button)
         }
     }
 }

@@ -122,6 +122,10 @@ class EditComponentDialog(private val fragment: LEDStripComponentFragment, conte
         }
         dialog!!.show()
     }
+
+    /**
+     * This constructor is for editing an existing component.
+     */
     constructor(fragment: LEDStripComponentFragment, context: Activity,
                 componentToEdit: LEDStripComponent) : this(fragment, context)
     {

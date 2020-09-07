@@ -41,7 +41,8 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
             val driverAddr = getByte()
             val pin = getByte()
             val color = bytesToColor()
-            components.add(LEDStripComponent(color, controller.getPWMDriver(driverAddr)!!, pin))
+            val pwmDriver = controller.getPWMDriverByAddress(driverAddr)
+            components.add(LEDStripComponent(color, pwmDriver!!, pin))
         }
         val name = bytesToStr()
         val currentSequence : ColorSequence? = if (currentSequenceID != 0) {

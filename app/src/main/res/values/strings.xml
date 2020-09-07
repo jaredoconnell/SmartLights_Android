@@ -14,8 +14,8 @@
     <string name="name_controller_field">Controller Name</string>
     <string name="set">Set</string>
     <string name="add_led_strip">Add LED Strip</string>
-    <string name="finish_adding_led_strip_component">Add Component</string>
-    <string name="add_led_strip_component">New LED Strip Component</string>
+    <string name="finish_adding_led_strip_component">Save Component</string>
+    <string name="edit_led_strip_component">New/Edit LED Strip Component</string>
     <string name="pin">Pin:</string>
     <string name="driver">Driver:</string>
     <string name="color_pick_text">"Color: "</string>

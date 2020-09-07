@@ -9,7 +9,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_led_strip_component"
+        android:text="@string/edit_led_strip_component"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
     <LinearLayout

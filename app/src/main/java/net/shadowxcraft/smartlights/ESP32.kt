@@ -17,22 +17,43 @@ import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
 import net.shadowxcraft.smartlights.packets.*
 import java.nio.charset.Charset
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 const val DEFAULT_NAME: String = "New Device"
 
-class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
+class ESP32(private val act: Activity) : BluetoothPeripheralCallback(), PinDriver {
     // Bluetooth stuff
     var device: BluetoothPeripheral? = null
     // Other stuff
     var name: String = DEFAULT_NAME
-    val pwmDrivers: SparseArray<PWMDriver> = SparseArray<PWMDriver>()
+    private val pwmDriversByAddress: TreeMap<Int, PinDriver> = TreeMap()
+    val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
     val ledStrips: SparseArray<LEDStrip> = SparseArray<LEDStrip>()
     val colorsSequences: SparseArray<ColorSequence> = SparseArray<ColorSequence>()
+    var pins: TreeMap<String, Int> = TreeMap()
     private var nextLEDStripID = 1
     private var nextColorSequenceID = 1
+
+    init {
+        pins["16-RX2"] = 16
+        pins["17-TX2"] = 17
+        pins["18-D18"] = 18
+        pins["19-D19"] = 19
+        pins["21-D21"] = 21
+        pins["22-D22"] = 22
+        pins["23-D23"] = 23
+        pins["25-D25"] = 25
+        pins["26-D26"] = 26
+        pins["27-D27"] = 27
+        pins["32-D32"] = 32
+        pins["33-D33"] = 33
+
+        pwmDriversByName[this.toString()] = this
+        pwmDriversByAddress[this.getAddress()] = this
+    }
 
     /**
      * Adds a controller.
@@ -41,7 +62,8 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
     fun addPWMDriver(pwmDriver: PWMDriver, sendPacket: Boolean) {
         //if(pwmDrivers.containsKey(pwmDriver.i2cAddress))
         //        throw IllegalStateException("Controller with same address already exists.")
-        pwmDrivers.append(pwmDriver.i2cAddress, pwmDriver)
+        pwmDriversByName[pwmDriver.toString()] = pwmDriver
+        pwmDriversByAddress[pwmDriver.i2cAddress] = pwmDriver
         Log.println(Log.INFO, "ESP32", "Adding PWM driver "
                 + pwmDriver.i2cAddress.toString() + " Is still connected: " + BLEControllerManager.bluetoothCentral?.connectedPeripherals.toString())
 
@@ -49,12 +71,37 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback() {
             AddPWMDriverPacket(this, pwmDriver).send()
     }
 
-    fun getPWMDriver(address: Int) : PWMDriver? {
-        return if (pwmDrivers.containsKey(address)) {
-            pwmDrivers[address]
-        } else {
-            null;
+    fun getPWMDriverByName(name: String) : PinDriver? {
+        return when {
+            pwmDriversByName.containsKey(name) -> {
+                pwmDriversByName[name]
+            }
+            else -> {
+                null;
+            }
         }
+    }
+    fun getPWMDriverByAddress(address: Int) : PinDriver? {
+        return when {
+            pwmDriversByAddress.containsKey(address) -> {
+                pwmDriversByAddress[address]
+            }
+            else -> {
+                null;
+            }
+        }
+    }
+
+    override fun getAllPins() : Map<String, Int> {
+        return pins;
+    }
+
+    override fun getAddress(): Int {
+        return 0
+    }
+
+    override fun toString(): String {
+        return "ESP32"
     }
 
     fun getNextLEDStripID() : Int {

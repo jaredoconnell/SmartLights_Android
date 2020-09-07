@@ -1,6 +1,5 @@
 package net.shadowxcraft.smartlights.ui.add_led_strip
 
-import net.shadowxcraft.smartlights.Color
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +12,7 @@ import net.shadowxcraft.smartlights.R
 
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
-class LEDStripComponentListAdapter(private val componentList: ArrayList<LEDStripComponent>)
+class LEDStripComponentListAdapter(private val fragment: LEDStripComponentFragment, private val componentList: ArrayList<LEDStripComponent>)
     : RecyclerView.Adapter<LEDStripComponentListAdapter.ViewHolder?>()
 {
 
@@ -26,8 +25,8 @@ class LEDStripComponentListAdapter(private val componentList: ArrayList<LEDStrip
         var driverView: TextView = itemView.findViewById(R.id.led_strip_component_driver)
         var pinView: TextView = itemView.findViewById(R.id.led_strip_component_pin)
         override fun onClick(v: View?) {
-            //val component = componentList[adapterPosition]
-
+            val component = componentList[adapterPosition]
+            EditComponentDialog(fragment, fragment.requireActivity(), component)
         }
 
         init {
@@ -59,10 +58,7 @@ class LEDStripComponentListAdapter(private val componentList: ArrayList<LEDStrip
         // Set item views based on your views and data model
         val color = component.color
         holder.colorView.setBackgroundColor(color.toArgb())
-        holder.driverView.text = if (component.driver == null)
-            "ESP32"
-        else
-            component.driver!!.i2cAddress.toString()
+        holder.driverView.text = component.driver.toString()
         holder.pinView.text = component.driverPin.toString()
     }
 }

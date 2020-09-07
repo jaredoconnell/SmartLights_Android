@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/add_led_strip_component" />
+        android:text="@string/edit_led_strip_component" />
 
     <EditText
         android:id="@+id/new_led_strip_name"

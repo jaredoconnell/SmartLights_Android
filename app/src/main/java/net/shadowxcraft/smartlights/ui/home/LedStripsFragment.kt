@@ -136,7 +136,8 @@ class LEDStripListAdapter(
             positionsRemaining -= ControllerManager.controllers[controllerIndex].ledStrips.size()
             controllerIndex++
         }
-        return ControllerManager.controllers[controllerIndex].ledStrips[positionsRemaining]
+        val ledStrips = ControllerManager.controllers[controllerIndex].ledStrips
+        return ledStrips[ledStrips.keyAt(positionsRemaining)]
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

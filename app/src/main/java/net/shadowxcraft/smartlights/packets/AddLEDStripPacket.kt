@@ -15,6 +15,9 @@ class AddLEDStripPacket(controller: ESP32, private val strip: LEDStrip) : Sendab
         val curColorSequenceID = curColorSequence?.id ?: 0
         output.addAll(shortToByteList(curColorSequenceID))
 
+        output.add(if (strip.onState) 1 else 0)
+        output.addAll(shortToByteList(strip.brightness))
+
         for (component in strip.components) {
             val driverID = component.driver.getAddress().toByte()
             output.add(driverID)

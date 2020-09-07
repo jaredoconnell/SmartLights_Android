@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 const val DEFAULT_NAME: String = "New Device"
 
-class ESP32(private val act: Activity) : BluetoothPeripheralCallback(), PinDriver {
+class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinDriver {
     // Bluetooth stuff
     var device: BluetoothPeripheral? = null
     // Other stuff
@@ -125,6 +125,7 @@ class ESP32(private val act: Activity) : BluetoothPeripheralCallback(), PinDrive
             // Maybe throw error in the future
         }
         ledStrips.put(strip.id, strip)
+        act.ledStripsFragment?.adapter?.notifyDataSetChanged()
 
         if (sendPacket)
             AddLEDStripPacket(this, strip).send()

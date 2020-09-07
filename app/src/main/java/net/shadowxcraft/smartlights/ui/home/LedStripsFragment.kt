@@ -3,8 +3,7 @@ package net.shadowxcraft.smartlights.ui.home
 import android.content.Context
 import android.os.Bundle
 import android.view.*
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -18,7 +17,7 @@ import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
 
 class LedStripsFragment : Fragment(), ButtonClickListener {
 
-    private var adapter: LEDStripListAdapter? = null
+    var adapter: LEDStripListAdapter? = null
 
     private lateinit var ledStripsViewModel: LedStripViewModel
 
@@ -60,7 +59,14 @@ class LedStripsFragment : Fragment(), ButtonClickListener {
         // Set layout manager to position the items
         rvControllers.layoutManager = LinearLayoutManager(context)
 
+        (activity as MainActivity).ledStripsFragment = this
+
         return root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        (activity as MainActivity).ledStripsFragment = null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -97,8 +103,10 @@ class LEDStripListAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        var nameView: TextView = itemView.findViewById(R.id.led_strip_name)
-        var colorsButtonView: Button = itemView.findViewById(R.id.set_colors_button)
+        val nameView: TextView = itemView.findViewById(R.id.led_strip_name)
+        val colorsButtonView: Button = itemView.findViewById(R.id.set_colors_button)
+        val offOnStateToggle: Switch = itemView.findViewById(R.id.on_off_switch)
+        val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
         override fun onClick(v: View?) {
             //val component = componentList[adapterPosition]
 
@@ -146,6 +154,32 @@ class LEDStripListAdapter(
         val component: LEDStrip = getNthLEDStrip(position)
             // Set item views based on your views and data model
         holder.nameView.text = component.name
+        holder.offOnStateToggle.isChecked = component.onState
+        holder.offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
+            component.onState = isChecked
+            component.sendBrightnessPacket()
+        }
+        holder.brightnessBar.max = MAX_BRIGHTNESS
+        holder.brightnessBar.progress = component.getBrightnessExponential()
+        holder.brightnessBar.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seek: SeekBar,
+                                           progress: Int, fromUser: Boolean)
+            {
+                component.setBrightnessExponential(progress)
+                if (component.brightness == 0) {
+                    // It's low enough that it rounds down to 0
+                    holder.brightnessBar.progress = 0
+                }
+                component.sendBrightnessPacket()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+        })
         holder.colorsButtonView.setOnClickListener {
             setColorClickListener.onButtonClicked(position, R.id.set_colors_button)
         }

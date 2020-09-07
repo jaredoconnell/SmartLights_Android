@@ -28,7 +28,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
     // BluetoothGatt represents the actual connection.
     private val connected: HashMap<String, ESP32> = HashMap()
     private var bluetoothAdapter: BluetoothAdapter? = null
-    var activity: Activity? = null
+    var activity: MainActivity? = null
     var discoverServicesRunnable: Runnable? = null
     var externConnectionListener: BluetoothConnectionListener? = null
     var externScanListener: BluetoothScanListener? = null
@@ -44,7 +44,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
     val TO_ESP32_UUID: UUID = UUID.fromString("6eed7e34-9f2a-4f0f-b1d6-70cd04e8e581")
     val TO_PHONE_UUID: UUID = UUID.fromString("1cf8d309-11a3-46fb-9378-9afff7dce3b4")
 
-    fun init(activity: Activity) {
+    fun init(activity: MainActivity) {
         this.activity = activity
         bluetoothCentral = BluetoothCentral(activity, this, Handler(Looper.getMainLooper()))
         val bluetoothManager: BluetoothManager =
@@ -81,7 +81,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
                 device.createBond()
             return false
         } else {
-            val newController = ESP32(this.activity!!)
+            val newController = ESP32(activity!!)
             newController.device = device
             connected[device.address] = newController
             bluetoothCentral!!.connectPeripheral(newController.device, newController)

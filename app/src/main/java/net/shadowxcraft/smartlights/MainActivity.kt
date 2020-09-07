@@ -14,6 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
+import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.lang.Exception
@@ -22,6 +23,8 @@ const val REQUEST_LOCATION_PERMISSION = 100
 
 class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentInteractionListener,
     BluetoothFragment.OnFragmentInteractionListener {
+
+    var ledStripsFragment: LedStripsFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

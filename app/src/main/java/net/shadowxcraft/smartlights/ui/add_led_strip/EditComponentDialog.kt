@@ -85,7 +85,7 @@ class EditComponentDialog(private val fragment: LEDStripComponentFragment, conte
                 dialog!!.getButton(AlertDialog.BUTTON_POSITIVE)
             button.setOnClickListener {
                 // First, validate the input
-                var driver = fragment.controller.getPWMDriverByName(driverSelector!!.selectedItem.toString())
+                val driver = fragment.controller.getPWMDriverByName(driverSelector!!.selectedItem.toString())
                 val pin = driver!!.getAllPins()[pinSelector!!.selectedItem as String]
                 val color = fragment.colors[colorSelector!!.selectedItem]
 

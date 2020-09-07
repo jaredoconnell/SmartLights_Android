@@ -37,6 +37,8 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         val components = ArrayList<LEDStripComponent>()
         val numColors = getByte()
         val currentSequenceID = getShort()
+        val isOn = getByte() != 0
+        val brightness = getShort()
         for (i in 0 until numColors) {
             val driverAddr = getByte()
             val pin = getByte()
@@ -50,8 +52,13 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         } else {
             null
         }
-        // TODO: Instead of null current sequence, get it.
-        return LEDStrip(id, name, components, currentSequence, controller)
+
+        val newLEDStrip = LEDStrip(id, name, components, currentSequence, controller)
+
+        newLEDStrip.onState = isOn
+        newLEDStrip.brightness = brightness
+
+        return newLEDStrip
     }
 
     protected fun bytesToColorSequence() : ColorSequence {

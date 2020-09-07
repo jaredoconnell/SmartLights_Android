@@ -36,4 +36,6 @@
     <string name="name_led_strip_field">LED Strip Name</string>
     <string name="preview">Preview</string>
     <string name="transition_time_editor_title">Transition Time (Minutes:Seconds:60ths)</string>
+    <string name="off">OFF</string>
+    <string name="on">ON</string>
 </resources>

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
@@ -27,6 +28,7 @@ class ControllerListAdapter(deviceList: ArrayList<ESP32>,
         var nameTextView: TextView = itemView.findViewById(R.id.controller_name)
         var addPWMDriverButton: Button = itemView.findViewById(R.id.add_pwm_driver_button)
         var addLEDStripButton: Button = itemView.findViewById(R.id.add_led_strip_button)
+        var renameControllerButton: ImageView = itemView.findViewById(R.id.rename_controller_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -52,12 +54,16 @@ class ControllerListAdapter(deviceList: ArrayList<ESP32>,
         val nameTextView: TextView = holder.nameTextView
         nameTextView.text = device.name
         val pwmDriverButton: Button = holder.addPWMDriverButton
+        val renameControllerButton: ImageView = holder.renameControllerButton
         val addLEDStripButton: Button = holder.addLEDStripButton
         pwmDriverButton.setOnClickListener {
             pwmButtonClickListener.onButtonClicked(position, R.id.add_pwm_driver_button)
         }
         addLEDStripButton.setOnClickListener {
             pwmButtonClickListener.onButtonClicked(position, R.id.add_led_strip_button)
+        }
+        renameControllerButton.setOnClickListener {
+            pwmButtonClickListener.onButtonClicked(position, R.id.rename_controller_button)
         }
 
     }

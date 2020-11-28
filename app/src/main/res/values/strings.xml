@@ -9,7 +9,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bluetooth_scanner_message">Scanning for nearby devices…</string>
     <string name="controller_list_message">Tap on a controller to add an LED Strip\nOr tap on the + to connect to a controller.</string>
-    <string name="on_connection_title">Successfully Connected</string>
+    <string name="rename_dialog_title">Rename Controller</string>
     <string name="name_controller">Please name the controller.</string>
     <string name="name_controller_field">Controller Name</string>
     <string name="set">Set</string>
@@ -38,4 +38,6 @@
     <string name="transition_time_editor_title">Transition Time (Minutes:Seconds:60ths)</string>
     <string name="off">OFF</string>
     <string name="on">ON</string>
+    <string name="rename">Rename</string>
+    <string name="rename_explanation">Rename the controller</string>
 </resources>

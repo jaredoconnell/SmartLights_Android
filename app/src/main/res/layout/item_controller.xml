@@ -8,31 +8,45 @@
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp">
 
-    <TextView
-        android:id="@+id/controller_name"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="Device"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        />
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/controller_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Device"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+        <ImageView
+            android:id="@+id/rename_controller_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_edit_24"
+            android:contentDescription="@string/rename_explanation" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonBarStyle">
 
         <Button
             android:id="@+id/add_pwm_driver_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/add_pwm_driver"/>
+            android:text="@string/add_pwm_driver"
+            style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
             android:id="@+id/add_led_strip_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/add_led_strip"/>
+            android:text="@string/add_led_strip"
+            style="?android:attr/buttonBarButtonStyle"/>
 
     </LinearLayout>
 

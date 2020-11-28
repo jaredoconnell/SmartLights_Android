@@ -135,6 +135,9 @@ class ControllersFragment : Fragment(), BLEControllerManager.BluetoothConnection
             R.id.add_led_strip_button -> {
                 Utils.replaceFragment(LEDStripComponentFragment(device), parentFragmentManager)
             }
+            R.id.rename_controller_button -> {
+                device.renameController(this)
+            }
             else -> {
                 Toast.makeText(
                     BLEControllerManager.activity,

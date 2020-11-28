@@ -1,6 +1,5 @@
 package net.shadowxcraft.smartlights
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
@@ -10,19 +9,17 @@ import android.util.Log
 import android.util.SparseArray
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.util.contains
 import androidx.core.util.containsKey
 import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
 import net.shadowxcraft.smartlights.packets.*
-import java.nio.charset.Charset
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-const val DEFAULT_NAME: String = "New Device"
+const val DEFAULT_NAME: String = "LEDs"
 
 class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinDriver {
     // Bluetooth stuff
@@ -144,38 +141,53 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     }
 
     private fun checkName(listener: BLEControllerManager.BluetoothConnectionListener?) {
-        if (name == DEFAULT_NAME) {
-            val builder = AlertDialog.Builder(act)
-            val inflater = act.layoutInflater;
-            val view = inflater.inflate(R.layout.bluetooth_connected_layout, null)
-            builder.setView(view)
-                // Add action buttons
-                .setPositiveButton(R.string.set) { _, _ ->
-                    this.name = view.findViewById<EditText>(R.id.controllerName).text.toString().trim()
-                    if (this.name.isEmpty())
-                        this.name = DEFAULT_NAME
+        if (name.trim() == DEFAULT_NAME) {
+            renameController(listener);
+        }
+    }
 
+    fun renameController(listener: BLEControllerManager.BluetoothConnectionListener?) {
+        val builder = AlertDialog.Builder(act)
+        val inflater = act.layoutInflater;
+        val view = inflater.inflate(R.layout.bluetooth_rename_layout, null)
+        builder.setView(view)
+            // Add action buttons
+            .setPositiveButton(R.string.set) { _, _ ->
+                this.name = view.findViewById<EditText>(R.id.controllerName).text.toString().trim()
+                if (this.name.isEmpty())
+                    this.name = DEFAULT_NAME
+                else {
+                    SetSettingPacket(this,
+                        ControllerSetting("name", this.name)).send()
                     listener?.onControllerChange(this)
+
                     saveToDB(BLEControllerManager.activity!!)
                     Toast.makeText(
                         BLEControllerManager.activity,
                         "Saved to DB",
                         Toast.LENGTH_SHORT
                     ).show()
-                }.show()
-        }
+                }
+            }.show()
     }
 
     fun onConnection() {
         // Makes sure proper communication is possible, then makes sure it's all up to date.
         device?.requestMtu(512)
-        checkName(BLEControllerManager.externConnectionListener)
+        if (device != null) {
+            name = device!!.name
+        }
+        Toast.makeText(BLEControllerManager.activity,
+            "Connected.",
+            Toast.LENGTH_SHORT
+        )
 
         val exec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
         exec.schedule({
             // Delay in case the requested mtu has not applied.
             requestDataFromDriver()
+            checkName(BLEControllerManager.externConnectionListener)
         }, 2, TimeUnit.SECONDS)
     }
 

@@ -3,15 +3,13 @@ package net.shadowxcraft.smartlights.ui.edit_color_sequence
 import android.app.Activity
 import android.app.AlertDialog
 import android.graphics.PorterDuff
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.NumberPicker
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -155,6 +153,9 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
         val builder = AlertDialog.Builder(act)
         val inflater = act.layoutInflater;
         val view = inflater.inflate(R.layout.color_editor, null)
+        val colorTempSeekBar: SeekBar = view.findViewById(R.id.color_temp_bar)
+        val colorTempIndicator: TextView = view.findViewById(R.id.color_id_indicator)
+        val colorTempBackground: ImageView = view.findViewById(R.id.color_temp_preview)
         val colorPicker: HSLColorPicker = view.findViewById(R.id.colorPicker)
         val backgroundImage: ImageView = view.findViewById(R.id.color_picker_preview_background)
         lastColor = if (colorIndex >= 0) {
@@ -165,14 +166,46 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
         }
         colorPicker.setColor(lastColor)
         backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
-
+        // Hide the seekbar until touched
+        colorTempSeekBar.thumb.mutate().alpha = 0
+        // Show background
+        val color = Color(0)
+        val colors: ArrayList<Int> = ArrayList()
+        for (i in 1..80) {
+            color.setRGBFromTemp(i * 100 + 1000)
+            colors.add(color.toArgb())
+        }
+        val gradient = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
+            colors.toIntArray())
+        colorTempBackground.setImageDrawable(gradient)
 
         colorPicker.setColorSelectionListener(object : SimpleColorSelectionListener() {
             override fun onColorSelected(color: Int) {
                 // Do whatever you want with the color
-                Log.println(Log.INFO, "ColorSeqEditorFragment", "Color: $color")
                 lastColor = color
                 backgroundImage.background.setColorFilter(color, PorterDuff.Mode.MULTIPLY)
+                colorTempIndicator.text = Color(lastColor).toString()
+            }
+        })
+        colorTempSeekBar.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seek: SeekBar,
+                                           progress: Int, fromUser: Boolean)
+            {
+                // Show the seekbar
+                colorTempSeekBar.thumb.mutate().alpha = 255
+                val colorTemp = progress * 100 + 1000;
+                val color = Color(colorTemp, 255)
+                lastColor = color.toArgb()
+                colorPicker.setColor(lastColor)
+                backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
+                colorTempIndicator.text = "${colorTemp}k"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
         })
 

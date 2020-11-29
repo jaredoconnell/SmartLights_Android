@@ -40,4 +40,5 @@
     <string name="on">ON</string>
     <string name="rename">Rename</string>
     <string name="rename_explanation">Rename the controller</string>
+    <string name="color_temp_background_description">The color temp background</string>
 </resources>

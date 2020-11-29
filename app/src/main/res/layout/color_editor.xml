@@ -19,7 +19,7 @@
         pikolo:arc_length="110"
         pikolo:hue_start_angle="30"
         pikolo:lightness_start_angle="270"
-        pikolo:radius_offset="20dp"
+        pikolo:radius_offset="2dp"
         pikolo:saturation_indicator_stroke_color="@color/colorPrimary"
         pikolo:saturation_start_angle="150"/>
 
@@ -37,5 +37,31 @@
         app:layout_constraintStart_toStartOf="@+id/colorPicker"
         app:layout_constraintTop_toTopOf="@+id/colorPicker"
         android:contentDescription="@string/the_color_preview" />
+
+    <TextView
+        android:id="@+id/color_id_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        app:layout_constraintBottom_toTopOf="@id/color_temp_bar"
+        app:layout_constraintLeft_toLeftOf="@id/color_temp_bar"
+        />
+
+    <ImageView
+        android:id="@+id/color_temp_preview"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        app:layout_constraintTop_toTopOf="@id/color_temp_bar"
+        android:contentDescription="@string/color_temp_background_description" />
+
+    <SeekBar
+        android:id="@+id/color_temp_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="2dp"
+        android:max="80"
+        android:progress="0"
+        app:layout_constraintTop_toBottomOf="@+id/colorPicker"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

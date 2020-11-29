@@ -26,7 +26,7 @@ class Color() { // default constructor creates a white color.
         blue = (rgba and 0xff)
         //val a: Float = (rgba shr 24 and 0xff) / 255.0f
     }
-    private fun setRGBFromTemp(temp: Int) {
+    fun setRGBFromTemp(temp: Int) {
         val temperature = temp / 100.0
         var red: Double
         var green: Double

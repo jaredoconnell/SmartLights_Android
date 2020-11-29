@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
+import net.shadowxcraft.smartlights.BLEControllerManager.activity
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
 
@@ -158,6 +159,13 @@ class LEDStripListAdapter(
         holder.offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
             component.onState = isChecked
             component.sendBrightnessPacket()
+            if (isChecked && component.brightness < 300
+                && (activity as MainActivity).getLuxVal() > 1000)
+            {
+                Toast.makeText(activity,
+                    "The LED is dim in a bright room.",
+                    Toast.LENGTH_SHORT).show()
+            }
         }
         holder.brightnessBar.max = MAX_BRIGHTNESS
         holder.brightnessBar.progress = component.getBrightnessExponential()

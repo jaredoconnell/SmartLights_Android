@@ -1,6 +1,11 @@
 package net.shadowxcraft.smartlights
 
 import android.Manifest
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -22,14 +27,21 @@ import java.lang.Exception
 const val REQUEST_LOCATION_PERMISSION = 100
 
 class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentInteractionListener,
-    BluetoothFragment.OnFragmentInteractionListener {
+    BluetoothFragment.OnFragmentInteractionListener, SensorEventListener {
 
     var ledStripsFragment: LedStripsFragment? = null
+    private lateinit var sensorManager: SensorManager
+    private var lightSensor: Sensor? = null
+    private var lastLuxVal = 0.0f
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
@@ -107,5 +119,31 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         } catch (any: Exception) {
 
         }
+    }
+
+    override fun onResume() {
+        // Register a listener for the sensor.
+        super.onResume()
+        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause() {
+        // Be sure to unregister the sensor when the activity pauses.
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event != null) {
+            lastLuxVal = event.values[0]
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
+
+    fun getLuxVal(): Float {
+        return lastLuxVal;
     }
 }

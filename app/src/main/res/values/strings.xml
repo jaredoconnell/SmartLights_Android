@@ -41,4 +41,6 @@
     <string name="rename">Rename</string>
     <string name="rename_explanation">Rename the controller</string>
     <string name="color_temp_background_description">The color temp background</string>
+    <string name="sustain_time_label">Sustain Time (Minutes:Seconds:60ths)</string>
+    <string name="add_color_hint">Click the + to add a color</string>
 </resources>

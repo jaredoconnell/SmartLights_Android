@@ -39,6 +39,9 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         val currentSequenceID = getShort()
         val isOn = getByte() != 0
         val brightness = getShort()
+        val hasTemporaryColor = getByte() != 0
+        val secondsLeftTempColor = getShort()
+        val tempColor = bytesToColor()
         for (i in 0 until numColors) {
             val driverAddr = getByte()
             val pin = getByte()
@@ -57,6 +60,8 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
 
         newLEDStrip.onState = isOn
         newLEDStrip.brightness = brightness
+        if (hasTemporaryColor && secondsLeftTempColor == 0)
+            newLEDStrip.simpleColor = tempColor
 
         return newLEDStrip
     }

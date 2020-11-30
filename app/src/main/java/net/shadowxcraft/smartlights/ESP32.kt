@@ -10,6 +10,7 @@ import android.util.SparseArray
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.util.containsKey
+import androidx.core.util.isNotEmpty
 import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
@@ -30,9 +31,12 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
     val ledStrips: SparseArray<LEDStrip> = SparseArray<LEDStrip>()
     val colorsSequences: SparseArray<ColorSequence> = SparseArray<ColorSequence>()
+    val queuedPackets: SparseArray<SendablePacket> = SparseArray()
     var pins: TreeMap<String, Int> = TreeMap()
     private var nextLEDStripID = 1
     private var nextColorSequenceID = 1
+
+    private val queuedPacketsTimer = Timer()
 
     init {
         pins["16-RX2"] = 16
@@ -50,6 +54,16 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
 
         pwmDriversByName[this.toString()] = this
         pwmDriversByAddress[this.getAddress()] = this
+
+        queuedPacketsTimer.schedule(object : TimerTask() {
+            override fun run() {
+                if (queuedPackets.isNotEmpty()) {
+                    val packet = queuedPackets.valueAt(0)
+                    queuedPackets.removeAt(0)
+                    packet.send()
+                }
+            }
+        }, 200, 100)
     }
 
     /**
@@ -204,6 +218,19 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         values.put(CONTROLLER_COLUMN_ADDRESS, device!!.address.toString())
         values.put(CONTROLLER_COLUMN_NAME, name)
         database.replace(CONTROLLER_TABLE_NAME, null, values)
+    }
+
+    /**
+     * Used for queueing a packet that should be ignored if a second of that type shows up.
+     * For example, when the user has a seek bar, and they drag their finger across it,
+     * only the latest packets should be sent.
+     */
+    fun queuePacket(packet: SendablePacket) {
+        queuedPackets[packet.packetID] = packet
+    }
+
+    fun clearQueueForPacketID(id: Int) {
+        queuedPackets.remove(id)
     }
 
     /*

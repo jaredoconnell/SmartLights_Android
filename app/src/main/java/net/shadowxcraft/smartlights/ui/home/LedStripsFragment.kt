@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.BLEControllerManager.activity
+import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
+import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
 
@@ -101,23 +103,70 @@ class LEDStripListAdapter(
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    inner class ViewHolder(itemView: View)
+        : RecyclerView.ViewHolder(itemView), View.OnClickListener,
+        ColorEditorDialog.ColorSelectedListener
+    {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         val nameView: TextView = itemView.findViewById(R.id.led_strip_name)
         val colorsButtonView: Button = itemView.findViewById(R.id.set_colors_button)
         val offOnStateToggle: Switch = itemView.findViewById(R.id.on_off_switch)
         val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
+        var ledStrip: LEDStrip? = null
         override fun onClick(v: View?) {
-            //val component = componentList[adapterPosition]
-
+            val dialog = ColorEditorDialog(activity!!, ledStrip!!.simpleColor, ledStrip!!)
+            dialog.listener = this
+            dialog.display()
         }
 
-        init {
-            itemView.setOnClickListener(this)
+        fun setLEDStrip(ledStrip: LEDStrip) {
+            this.ledStrip = ledStrip
+            nameView.text = ledStrip.name
+            offOnStateToggle.isChecked = ledStrip.onState
+            offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
+                ledStrip.onState = isChecked
+                ledStrip.sendBrightnessPacket()
+                if (isChecked && ledStrip.brightness < 300
+                    && (activity as MainActivity).getLuxVal() > 1000)
+                {
+                    Toast.makeText(activity,
+                        "The LED is dim in a bright room.",
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+            brightnessBar.max = MAX_BRIGHTNESS
+            brightnessBar.progress = ledStrip.getBrightnessExponential()
+            brightnessBar.setOnSeekBarChangeListener(object :
+                SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seek: SeekBar,
+                                               progress: Int, fromUser: Boolean)
+                {
+                    ledStrip.setBrightnessExponential(progress)
+                    if (ledStrip.brightness == 0) {
+                        // It's low enough that it rounds down to 0
+                        brightnessBar.progress = 0
+                    }
+                    ledStrip.sendBrightnessPacket()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+            })
+            colorsButtonView.setOnClickListener {
+                setColorClickListener.onButtonClicked(position, R.id.set_colors_button)
+            }
         }
 
-
+        override fun onColorSelected(color: Color) {
+            ledStrip!!.simpleColor = color
+            // Clear the preview that likely built up.
+            ledStrip!!.controller.clearQueueForPacketID(19)
+            SetColorForLEDStripPacket(ledStrip!!, color, 0).send()// indefinitely
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -154,43 +203,9 @@ class LEDStripListAdapter(
         // Find the applicable controller
         val component: LEDStrip = getNthLEDStrip(position)
             // Set item views based on your views and data model
-        holder.nameView.text = component.name
-        holder.offOnStateToggle.isChecked = component.onState
-        holder.offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
-            component.onState = isChecked
-            component.sendBrightnessPacket()
-            if (isChecked && component.brightness < 300
-                && (activity as MainActivity).getLuxVal() > 1000)
-            {
-                Toast.makeText(activity,
-                    "The LED is dim in a bright room.",
-                    Toast.LENGTH_SHORT).show()
-            }
-        }
-        holder.brightnessBar.max = MAX_BRIGHTNESS
-        holder.brightnessBar.progress = component.getBrightnessExponential()
-        holder.brightnessBar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seek: SeekBar,
-                                           progress: Int, fromUser: Boolean)
-            {
-                component.setBrightnessExponential(progress)
-                if (component.brightness == 0) {
-                    // It's low enough that it rounds down to 0
-                    holder.brightnessBar.progress = 0
-                }
-                component.sendBrightnessPacket()
-            }
+        holder.setLEDStrip(component)
+        holder.itemView.setOnClickListener(holder)
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-        })
-        holder.colorsButtonView.setOnClickListener {
-            setColorClickListener.onButtonClicked(position, R.id.set_colors_button)
-        }
         /*holder.colorView.setBackgroundColor(android.graphics.Color.argb(255, color.red, color.green, color.blue))
         holder.driverView.text = component.driver.i2cAddress.toString()
         holder.pinView.text = component.driverPin.toString()*/

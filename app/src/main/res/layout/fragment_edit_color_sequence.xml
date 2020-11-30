@@ -1,109 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/text_controllers"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/edit_color_sequence" />
-
-    <androidx.core.widget.NestedScrollView
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:layout_below="@id/text_controllers">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/text_controllers"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:text="@string/edit_color_sequence" />
 
-            <EditText
-                android:id="@+id/edit_color_sequence_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords"
-                android:hint="@string/name_color_sequence_field"
-                android:autofillHints="">
-            </EditText>
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed"
+            app:tabInlineLabel="true"/>
+
+        <ViewFlipper
+            android:id="@+id/flipper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:id="@+id/color_sequence_timing_fields"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/add_colors_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textSize="15sp"
+                    android:text="@string/add_color_hint" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/color_sequence_colors"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Sustain Time (Minutes:Seconds:60ths)"/>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <NumberPicker
-                        android:id="@+id/color_sequence_sustain_minutes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <NumberPicker
-                        android:id="@+id/color_sequence_sustain_seconds"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <NumberPicker
-                        android:id="@+id/color_sequence_sustain_frames"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/transition_time_editor_title"/>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <NumberPicker
-                        android:id="@+id/color_sequence_transition_minutes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <NumberPicker
-                        android:id="@+id/color_sequence_transition_seconds"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <NumberPicker
-                        android:id="@+id/color_sequence_transition_frames"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
+                    android:clipToPadding="false"
+                    android:paddingBottom="60dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
             </LinearLayout>
 
+            <androidx.core.widget.NestedScrollView
+                android:layout_height="match_parent"
+                android:layout_width="match_parent">
 
-            <ImageView
-                android:id="@+id/item_color_sequence_preview"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:contentDescription="@string/preview" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/color_sequence_colors"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:paddingBottom="60dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+                    <EditText
+                        android:id="@+id/edit_color_sequence_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:hint="@string/name_color_sequence_field"
+                        android:autofillHints="">
+                    </EditText>
 
+                    <LinearLayout
+                        android:id="@+id/color_sequence_timing_fields"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/sustain_time_label"/>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            <NumberPicker
+                                android:id="@+id/color_sequence_sustain_minutes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <NumberPicker
+                                android:id="@+id/color_sequence_sustain_seconds"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <NumberPicker
+                                android:id="@+id/color_sequence_sustain_frames"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/transition_time_editor_title"/>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            <NumberPicker
+                                android:id="@+id/color_sequence_transition_minutes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <NumberPicker
+                                android:id="@+id/color_sequence_transition_seconds"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <NumberPicker
+                                android:id="@+id/color_sequence_transition_frames"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </ViewFlipper>
+
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_color_sequence_color"
@@ -130,5 +152,4 @@
         android:layout_marginEnd="14dp"
         android:layout_marginBottom="77dp"
         android:src="@drawable/ic_baseline_check_24"/>
-
 </RelativeLayout>

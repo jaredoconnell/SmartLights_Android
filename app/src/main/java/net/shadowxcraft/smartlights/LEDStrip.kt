@@ -12,6 +12,7 @@ class LEDStrip(val id: Int, val name: String, val components: ArrayList<LEDStrip
 {
     var brightness = MAX_BRIGHTNESS
     var onState = true
+    var simpleColor = Color(255, 0, 0)
 
     /**
      * Give it a value between 0 and MAX_BRIGHTNESS,
@@ -36,6 +37,6 @@ class LEDStrip(val id: Int, val name: String, val components: ArrayList<LEDStrip
     }
 
     fun sendBrightnessPacket() {
-        SetBrightnessForLEDStrip(this).send()
+        SetBrightnessForLEDStrip(this).queue()
     }
 }

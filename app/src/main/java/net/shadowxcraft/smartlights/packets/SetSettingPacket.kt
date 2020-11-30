@@ -2,7 +2,9 @@ package net.shadowxcraft.smartlights.packets
 
 import net.shadowxcraft.smartlights.*
 
-class SetSettingPacket(controller: ESP32, private val setting: ControllerSetting) : SendablePacket(controller) {
+class SetSettingPacket(controller: ESP32, private val setting: ControllerSetting)
+    : SendablePacket(controller, 18)
+{
     override fun send() {
         val output = ArrayList<Byte>();
         output.add(18) // packet ID 18

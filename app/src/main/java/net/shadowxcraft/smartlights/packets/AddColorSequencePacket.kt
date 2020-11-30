@@ -5,7 +5,9 @@ import net.shadowxcraft.smartlights.ESP32
 import net.shadowxcraft.smartlights.LEDStrip
 import net.shadowxcraft.smartlights.PWMDriver
 
-class AddColorSequencePacket(controller: ESP32, private val sequence: ColorSequence) : SendablePacket(controller) {
+class AddColorSequencePacket(controller: ESP32, private val sequence: ColorSequence)
+    : SendablePacket(controller, 8)
+{
     override fun send() {
         val output = ArrayList<Byte>();
         output.add(8) // packet ID 8

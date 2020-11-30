@@ -34,7 +34,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
                 Utils.replaceFragment(
                     ColorSequenceEditorFragment(
                         requireActivity(),
-                        ColorSequence(strip.controller.getNextColorStripID(), "New Color Sequence"),
+                        ColorSequence(strip.controller.getNextColorStripID(), ""),
                         strip.controller,
                         strip
                     ), parentFragmentManager

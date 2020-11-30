@@ -2,7 +2,9 @@ package net.shadowxcraft.smartlights.packets
 
 import net.shadowxcraft.smartlights.LEDStrip
 
-class SetBrightnessForLEDStrip(private val ledStrip: LEDStrip) : SendablePacket(ledStrip.controller) {
+class SetBrightnessForLEDStrip(private val ledStrip: LEDStrip)
+    : SendablePacket(ledStrip.controller, 16)
+{
     override fun send() {
         val output = ArrayList<Byte>();
         output.add(16) // packet ID

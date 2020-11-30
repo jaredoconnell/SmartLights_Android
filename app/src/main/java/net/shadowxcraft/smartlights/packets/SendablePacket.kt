@@ -5,13 +5,18 @@ import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.Color
 import net.shadowxcraft.smartlights.ESP32
 
-abstract class SendablePacket(private val controller: ESP32) {
+abstract class SendablePacket(private val controller: ESP32, val packetID: Int) {
     protected var writeCharacteristic: BluetoothGattCharacteristic? = null
+
     init {
         writeCharacteristic = controller.device!!.getCharacteristic(
             BLEControllerManager.SERVICE_UUID,
             BLEControllerManager.TO_ESP32_UUID
         )
+    }
+
+    fun queue() {
+        controller.queuePacket(this)
     }
 
     abstract fun send();

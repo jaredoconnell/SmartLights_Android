@@ -1,9 +1,6 @@
 package net.shadowxcraft.smartlights.ui.edit_color_sequence
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.graphics.PorterDuff
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,11 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.madrapps.pikolo.HSLColorPicker
-import com.madrapps.pikolo.listeners.SimpleColorSelectionListener
+import com.google.android.material.tabs.TabLayout
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.R.layout
 import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
+import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 
 
 /**
@@ -31,10 +28,14 @@ import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
  */
 class ColorSequenceEditorFragment(private val act: Activity, private val colorSequence: ColorSequence,
                                   private val controller: ESP32, private val ledstrip: LEDStrip?)
-    : Fragment(), ButtonClickListener
-{
+    : Fragment(), ButtonClickListener, ColorEditorDialog.ColorSelectedListener,
+    TabLayout.OnTabSelectedListener {
+    private lateinit var tabLayout: TabLayout
+    private lateinit var flipper: ViewFlipper
+    private lateinit var colorsView: View
+    private lateinit var propertiesView: View
     private var adapter: ColorSequenceEditorListAdapter? = null
-    private var lastColor: Int = android.graphics.Color.RED
+    private var editedColorIndex = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +43,13 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
     ): View? {
         // Inflate the layout for this fragment
         val currentView: View = inflater.inflate(layout.fragment_edit_color_sequence, container, false)
+
+        tabLayout = currentView.findViewById(R.id.tabs)
+        flipper = currentView.findViewById(R.id.flipper)
+        tabLayout.addOnTabSelectedListener(this)
+        tabLayout.addTab(tabLayout.newTab().setText("Colors").setIcon(R.drawable.ic_baseline_color_lens_24))
+        tabLayout.addTab(tabLayout.newTab().setText("Properties").setIcon(R.drawable.ic_baseline_edit_24))
+
         val sustainTimeMinutesView = currentView.findViewById<NumberPicker>(R.id.color_sequence_sustain_minutes)
         sustainTimeMinutesView.maxValue = 59
         sustainTimeMinutesView.minValue = 0
@@ -79,6 +87,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
             val name = nameComponent.text.toString()
             when {
                 colorSequence.colors.isEmpty() -> {
+                    tabLayout.getTabAt(0)?.select()
                     Toast.makeText(
                         BLEControllerManager.activity,
                         "Please add at least one color.",
@@ -86,6 +95,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                     ).show()
                 }
                 name.isEmpty() -> {
+                    tabLayout.getTabAt(1)?.select()
                     Toast.makeText(
                         BLEControllerManager.activity,
                         "Please give the color sequence a name.",
@@ -150,81 +160,36 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
     }
 
     private fun displayColorEditor(colorIndex: Int) {
-        val builder = AlertDialog.Builder(act)
-        val inflater = act.layoutInflater;
-        val view = inflater.inflate(R.layout.color_editor, null)
-        val colorTempSeekBar: SeekBar = view.findViewById(R.id.color_temp_bar)
-        val colorTempIndicator: TextView = view.findViewById(R.id.color_id_indicator)
-        val colorTempBackground: ImageView = view.findViewById(R.id.color_temp_preview)
-        val colorPicker: HSLColorPicker = view.findViewById(R.id.colorPicker)
-        val backgroundImage: ImageView = view.findViewById(R.id.color_picker_preview_background)
-        lastColor = if (colorIndex >= 0) {
+        editedColorIndex = colorIndex
+        val initialColor = if (colorIndex >= 0) {
             // Set to existing color
-            colorSequence.colors[colorIndex].toArgb()
+            colorSequence.colors[colorIndex]
         } else {
-            android.graphics.Color.RED
+            Color(255, 0, 0)
         }
-        colorPicker.setColor(lastColor)
-        backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
-        // Hide the seekbar until touched
-        colorTempSeekBar.thumb.mutate().alpha = 0
-        // Show background
-        val color = Color(0)
-        val colors: ArrayList<Int> = ArrayList()
-        for (i in 1..80) {
-            color.setRGBFromTemp(i * 100 + 1000)
-            colors.add(color.toArgb())
+        val dialog = ColorEditorDialog(act, initialColor, ledstrip)
+        dialog.listener = this
+        dialog.display()
+
+    }
+
+    override fun onColorSelected(newColor: Color) {
+        if (editedColorIndex >= 0) {
+            // Edit existing color
+            colorSequence.colors[editedColorIndex] = newColor
+        } else {
+            colorSequence.colors.add(newColor)
         }
-        val gradient = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
-            colors.toIntArray())
-        colorTempBackground.setImageDrawable(gradient)
+        adapter?.notifyDataSetChanged()
+    }
 
-        colorPicker.setColorSelectionListener(object : SimpleColorSelectionListener() {
-            override fun onColorSelected(color: Int) {
-                // Do whatever you want with the color
-                lastColor = color
-                backgroundImage.background.setColorFilter(color, PorterDuff.Mode.MULTIPLY)
-                colorTempIndicator.text = Color(lastColor).toString()
-            }
-        })
-        colorTempSeekBar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seek: SeekBar,
-                                           progress: Int, fromUser: Boolean)
-            {
-                // Show the seekbar
-                colorTempSeekBar.thumb.mutate().alpha = 255
-                val colorTemp = progress * 100 + 1000;
-                val color = Color(colorTemp, 255)
-                lastColor = color.toArgb()
-                colorPicker.setColor(lastColor)
-                backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
-                colorTempIndicator.text = "${colorTemp}k"
-            }
+    override fun onTabSelected(tab: TabLayout.Tab?) {
+        flipper.displayedChild = tab!!.position
+    }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
+    override fun onTabUnselected(tab: TabLayout.Tab?) {
+    }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-        })
-
-        builder.setView(view)
-            // Add action buttons
-            .setPositiveButton(R.string.set) { _, _ ->
-                val newColor = Color(lastColor)
-                if (colorIndex >= 0) {
-                    // Edit existing color
-                    colorSequence.colors[colorIndex] = newColor
-                } else {
-                    colorSequence.colors.add(newColor)
-                }
-                adapter?.notifyDataSetChanged()
-                Toast.makeText(
-                    BLEControllerManager.activity,
-                    "Applied",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }.show()
+    override fun onTabReselected(tab: TabLayout.Tab?) {
     }
 }

@@ -9,7 +9,7 @@ class SetBrightnessForLEDStrip(private val ledStrip: LEDStrip)
         val output = ArrayList<Byte>();
         output.add(16) // packet ID
 
-        output.addAll(shortToByteList(ledStrip.id))
+        output.addAll(strToByteList(ledStrip.id))
         output.add(if (ledStrip.onState) 1 else 0)
         output.addAll(shortToByteList(ledStrip.brightness))
         sendData(output.toByteArray())

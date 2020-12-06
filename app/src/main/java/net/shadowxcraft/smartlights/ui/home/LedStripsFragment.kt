@@ -183,19 +183,19 @@ class LEDStripListAdapter(
     override fun getItemCount(): Int {
         var size = 0;
         for (controller in ControllerManager.controllers)
-            size += controller.ledStrips.size()
+            size += controller.ledStrips.size
         return size
     }
 
     fun getNthLEDStrip(index: Int) : LEDStrip {
         var controllerIndex = 0
         var positionsRemaining = index
-        while (ControllerManager.controllers[controllerIndex].ledStrips.size() < positionsRemaining) {
-            positionsRemaining -= ControllerManager.controllers[controllerIndex].ledStrips.size()
+        while (ControllerManager.controllers[controllerIndex].ledStrips.size < positionsRemaining) {
+            positionsRemaining -= ControllerManager.controllers[controllerIndex].ledStrips.size
             controllerIndex++
         }
         val ledStrips = ControllerManager.controllers[controllerIndex].ledStrips
-        return ledStrips[ledStrips.keyAt(positionsRemaining)]
+        return ledStrips.values.toTypedArray()[positionsRemaining]
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

@@ -14,7 +14,7 @@ class SetColorForLEDStripPacket(private val ledStrip: LEDStrip,
         val output = ArrayList<Byte>();
         output.add(19) // packet ID
 
-        output.addAll(shortToByteList(ledStrip.id))
+        output.addAll(strToByteList(ledStrip.id))
         output.addAll(colorToByteList(color))
         output.addAll(shortToByteList(seconds))
         sendData(output.toByteArray())

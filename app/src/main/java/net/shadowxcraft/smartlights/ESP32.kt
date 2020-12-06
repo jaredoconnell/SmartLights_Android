@@ -9,7 +9,6 @@ import android.util.Log
 import android.util.SparseArray
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.util.containsKey
 import androidx.core.util.isNotEmpty
 import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
@@ -29,12 +28,10 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     var name: String = DEFAULT_NAME
     private val pwmDriversByAddress: TreeMap<Int, PinDriver> = TreeMap()
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
-    val ledStrips: SparseArray<LEDStrip> = SparseArray<LEDStrip>()
-    val colorsSequences: SparseArray<ColorSequence> = SparseArray<ColorSequence>()
+    val ledStrips: TreeMap<String, LEDStrip> = TreeMap()
+    val colorsSequences: TreeMap<String, ColorSequence> = TreeMap()
     val queuedPackets: SparseArray<SendablePacket> = SparseArray()
     var pins: TreeMap<String, Int> = TreeMap()
-    private var nextLEDStripID = 1
-    private var nextColorSequenceID = 1
 
     private val queuedPacketsTimer = Timer()
 
@@ -115,27 +112,15 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         return "ESP32"
     }
 
-    fun getNextLEDStripID() : Int {
-        // TODO: Do a more intelligent search for the next ID
-        return nextLEDStripID++
-    }
-
-    fun getNextColorStripID() : Int {
-        // TODO: Do a more intelligent search for the next ID
-        return nextColorSequenceID++
-    }
-
     /**
      * Stores the LED strip, then sends the LED strip to the controller.
      */
     fun addLEDStrip(strip: LEDStrip, sendPacket: Boolean) {
-        if (nextLEDStripID <= strip.id) {
-            nextLEDStripID = strip.id + 1
-        }
         if (ledStrips.containsKey(strip.id)) {
             // Maybe throw error in the future
+            Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
         }
-        ledStrips.put(strip.id, strip)
+        ledStrips[strip.id] = strip
         act.ledStripsFragment?.adapter?.notifyDataSetChanged()
 
         if (sendPacket)
@@ -143,9 +128,6 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     }
 
     fun addColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
-        if (nextColorSequenceID <= colorSequence.id) {
-            nextColorSequenceID = colorSequence.id + 1
-        }
         //if (!colorsSequences.contains(colorSequence.id)) {
         colorsSequences[colorSequence.id] = colorSequence
         //}
@@ -194,7 +176,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         Toast.makeText(BLEControllerManager.activity,
             "Connected.",
             Toast.LENGTH_SHORT
-        )
+        ).show()
 
         val exec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 

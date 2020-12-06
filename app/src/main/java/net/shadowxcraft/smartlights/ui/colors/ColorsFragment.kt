@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.edit_color_sequence.ColorSequenceEditorFragment
+import java.util.*
 
 class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListener, ClickListener {
     private var adapter: ColorsListListAdapter? = null
@@ -34,7 +35,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
                 Utils.replaceFragment(
                     ColorSequenceEditorFragment(
                         requireActivity(),
-                        ColorSequence(strip.controller.getNextColorStripID(), ""),
+                        ColorSequence(UUID.randomUUID().toString(), ""),
                         strip.controller,
                         strip
                     ), parentFragmentManager
@@ -65,9 +66,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
 
     override fun onButtonClicked(position: Int, itemId: Int) {
         // Open the editor for an existing color
-
-        val keyAtPosition = strip!!.controller.colorsSequences.keyAt(position)
-        val selectedSequence = strip.controller.colorsSequences.get(keyAtPosition)
+        val selectedSequence = strip!!.controller.colorsSequences.values.toTypedArray()[position]
 
         Utils.replaceFragment(ColorSequenceEditorFragment(requireActivity(),
             selectedSequence, strip.controller, strip), parentFragmentManager)
@@ -75,8 +74,7 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
 
     override fun onPositionClicked(position: Int) {
         // Set the color sequence for the LED strip
-        val keyAtPosition = strip!!.controller.colorsSequences.keyAt(position)
-        strip.currentSeq = strip.controller.colorsSequences.get(keyAtPosition)
+        strip!!.currentSeq = strip!!.controller.colorsSequences.values.toTypedArray()[position]
         SetColorSequenceForLEDStripPacket(strip).send()
     }
 }
@@ -122,13 +120,12 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
     }
 
     override fun getItemCount(): Int {
-        return controller.colorsSequences.size()
+        return controller.colorsSequences.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // Get the data model based on position
-        val keyAtPosition = controller.colorsSequences.keyAt(position)
-        val sequence: ColorSequence = controller.colorsSequences.get(keyAtPosition)
+        val sequence: ColorSequence = controller.colorsSequences.values.toTypedArray()[position]
 
         // Set item views based on your views and data model
         holder.nameView.text = sequence.name

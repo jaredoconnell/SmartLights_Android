@@ -60,7 +60,7 @@ class LEDStripComponentFragment(val controller: ESP32) : Fragment() {
                 && component.driver == driver && component.driverPin == pin)
                 return true
         }
-        for (strip in controller.ledStrips.valueIterator()) {
+        for (strip in controller.ledStrips.values) {
              for (component in strip.components) {
                  if (component != ignoredComponent && component.driver == driver && component.driverPin == pin)
                      return true
@@ -72,7 +72,7 @@ class LEDStripComponentFragment(val controller: ESP32) : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         val currentView: View = inflater.inflate(layout.fragment_led_strip_components, container, false)
         val addButton: View = currentView.findViewById(R.id.add_led_strip_component_floating_action_button)
@@ -99,7 +99,7 @@ class LEDStripComponentFragment(val controller: ESP32) : Fragment() {
                     ).show()
                 }
                 else -> {
-                    val nextID = controller.getNextLEDStripID()
+                    val nextID = UUID.randomUUID().toString()
                     val newStrip = LEDStrip(nextID, name, components, null, controller)
                     controller.addLEDStrip(newStrip, true)
                     (context as MainActivity).supportFragmentManager.popBackStack()

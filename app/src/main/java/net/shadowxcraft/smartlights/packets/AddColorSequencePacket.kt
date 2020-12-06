@@ -13,7 +13,7 @@ class AddColorSequencePacket(controller: ESP32, private val sequence: ColorSeque
         output.add(8) // packet ID 8
         output.add(1) // It's okay to overwrite it
 
-        output.addAll(shortToByteList(sequence.id)) // First the ID
+        output.addAll(strToByteList(sequence.id)) // First the ID
         output.add(sequence.colors.size.toByte()) // Number of colors in the sequence
         output.add(sequence.sequenceType)
         output.addAll(shortToByteList(sequence.sustainTime))

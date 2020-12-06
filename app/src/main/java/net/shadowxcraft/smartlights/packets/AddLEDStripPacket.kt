@@ -11,12 +11,12 @@ class AddLEDStripPacket(controller: ESP32, private val strip: LEDStrip)
     override fun send() {
         val output = ArrayList<Byte>();
         output.add(5) // packet ID 5
-        output.addAll(shortToByteList(strip.id))
+        output.addAll(strToByteList(strip.id))
         output.add(strip.components.size.toByte())
 
         val curColorSequence = strip.currentSeq
-        val curColorSequenceID = curColorSequence?.id ?: 0
-        output.addAll(shortToByteList(curColorSequenceID))
+        val curColorSequenceID = curColorSequence?.id ?: ""
+        output.addAll(strToByteList(curColorSequenceID))
 
         output.add(if (strip.onState) 1 else 0)
         output.addAll(shortToByteList(strip.brightness))

@@ -12,12 +12,12 @@ class SetColorSequenceForLEDStripPacket(private val ledStrip: LEDStrip)
         output.add(9) // packet ID
 
         val id = if (ledStrip.currentSeq == null) {
-            -1
+            ""
         } else {
             ledStrip.currentSeq!!.id
         }
-        output.addAll(shortToByteList(ledStrip.id))
-        output.addAll(shortToByteList(id))
+        output.addAll(strToByteList(ledStrip.id))
+        output.addAll(strToByteList(id))
         sendData(output.toByteArray())
 
     }

@@ -7,7 +7,7 @@ import kotlin.math.roundToInt
 
 const val MAX_BRIGHTNESS = 4095
 
-class LEDStrip(val id: Int, val name: String, val components: ArrayList<LEDStripComponent>,
+class LEDStrip(val id: String, val name: String, val components: ArrayList<LEDStripComponent>,
                var currentSeq: ColorSequence?, val controller: ESP32)
 {
     var brightness = MAX_BRIGHTNESS

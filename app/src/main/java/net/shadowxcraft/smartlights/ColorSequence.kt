@@ -2,7 +2,7 @@ package net.shadowxcraft.smartlights
 
 import android.graphics.drawable.GradientDrawable
 
-class ColorSequence(val id: Int, var name: String) {
+class ColorSequence(val id: String, var name: String) {
     val colors = ArrayList<Color>()
 
     val sequenceType: Byte = 0

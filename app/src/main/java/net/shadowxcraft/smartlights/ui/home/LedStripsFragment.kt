@@ -128,10 +128,10 @@ class LEDStripListAdapter(
                 ledStrip.onState = isChecked
                 ledStrip.sendBrightnessPacket()
                 if (isChecked && ledStrip.brightness < 300
-                    && (activity as MainActivity).getLuxVal() > 1000)
+                    && (activity as MainActivity).getLuxVal() > 100)
                 {
                     Toast.makeText(activity,
-                        "The LED is dim in a bright room.",
+                        "The LED is dim.",
                         Toast.LENGTH_SHORT).show()
                 }
             }

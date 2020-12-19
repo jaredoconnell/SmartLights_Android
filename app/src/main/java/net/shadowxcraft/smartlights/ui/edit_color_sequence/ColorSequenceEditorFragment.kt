@@ -2,7 +2,6 @@ package net.shadowxcraft.smartlights.ui.edit_color_sequence
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,19 +20,18 @@ import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 /**
  * A simple [Fragment] subclass.
  * Activities that contain this fragment must implement the
- * [ColorSequenceEditorFragment.OnFragmentInteractionListener] interface
+ * [ScheduledChangeEditorFragment.OnFragmentInteractionListener] interface
  * to handle interaction events.
- * Use the [ColorSequenceEditorFragment.newInstance] factory method to
+ * Use the [ScheduledChangeEditorFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
 class ColorSequenceEditorFragment(private val act: Activity, private val colorSequence: ColorSequence,
-                                  private val controller: ESP32, private val ledstrip: LEDStrip?)
+                                  private val controller: ESP32, private val ledstrip: LEDStrip?,
+                                  private val scheduledChange: ScheduledChange? = null)
     : Fragment(), ButtonClickListener, ColorEditorDialog.ColorSelectedListener,
     TabLayout.OnTabSelectedListener {
     private lateinit var tabLayout: TabLayout
     private lateinit var flipper: ViewFlipper
-    private lateinit var colorsView: View
-    private lateinit var propertiesView: View
     private var adapter: ColorSequenceEditorListAdapter? = null
     private var editedColorIndex = 0
 
@@ -124,9 +122,11 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
 
                         controller.addColorSequence(colorSequence, true)
 
-                        if (ledstrip != null) {
+                        if (ledstrip != null && scheduledChange == null) {
                             ledstrip.currentSeq = colorSequence
                             SetColorSequenceForLEDStripPacket(ledstrip).send()
+                        } else if (scheduledChange != null) {
+                            scheduledChange.newColorSequenceID = colorSequence.id
                         }
 
                         (context as MainActivity).supportFragmentManager.popBackStack()

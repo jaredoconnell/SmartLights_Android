@@ -1,5 +1,6 @@
 package net.shadowxcraft.smartlights.packets
 
+import android.util.Log
 import net.shadowxcraft.smartlights.*
 
 abstract class ReceivedPacket(protected val controller: ESP32, private val bytes: ByteArray) {
@@ -13,6 +14,13 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
 
     protected fun getShort() : Int {
         return getByte() * 256 + getByte()
+    }
+
+    protected fun getInt() : Int {
+        return getByte() * 256 * 256 * 256 +
+            getByte() * 256 * 256 +
+            getByte() * 256 +
+            getByte()
     }
 
     protected fun bytesToStr() : String {
@@ -87,5 +95,59 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         colorSequence.transitionTime = transitionTime
         //colorSequence.transitionType = transitionType.toByte()
         return colorSequence
+    }
+
+    protected fun bytesToScheduledChange(): ScheduledChange {
+        val id = bytesToStr()
+        val name = bytesToStr()
+        val sc = ScheduledChange(id, name, null)
+
+        sc.hour = getByte().toByte()
+        sc.minute = getByte().toByte()
+        sc.second = getByte().toByte()
+        sc.secondsUntilOff = getInt()
+
+        val type = getByte()
+        if (type == 0) {
+            sc.isSpecificDate = true
+            // Specific dates
+            val yearsSince1900 = getByte()
+            sc.year = yearsSince1900 + 1900
+            sc.month = getByte().toByte()
+            sc.day = getByte().toByte()
+            sc.repeatInverval = getShort()
+        } else if (type == 1) {
+            sc.isSpecificDate = false
+            // Days of week
+            val daysBitwise = getByte()
+            sc.days = daysBitwise
+        } else {
+            Log.println(Log.ERROR, "ReceivedPacket", "Unknown schedule type. Aborting.\n");
+            return sc;
+        }
+
+        val ledStripID = bytesToStr()
+        sc.ledStrip = controller.ledStrips[ledStripID]
+
+        val changes = getByte()
+        val turnOn = changes and 0b00000001 > 0
+        val brightnessChanges = changes and 0b00000010 > 0
+        val colorChanges = changes and 0b00000100 > 0
+        val colorSequenceChanges = changes and 0b00001000 > 0
+        sc.turnOn = turnOn
+
+        if (brightnessChanges) {
+            val newBrightness = getShort()
+            sc.newBrightness = newBrightness
+        } else {
+            sc.newBrightness = -1
+        }
+        if (colorChanges) {
+            sc.newColor = bytesToColor()
+        }
+        if (colorSequenceChanges) {
+            sc.newColorSequenceID = bytesToStr()
+        }
+        return sc
     }
 }

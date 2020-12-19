@@ -5,7 +5,7 @@ import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.Color
 import net.shadowxcraft.smartlights.ESP32
 
-abstract class SendablePacket(private val controller: ESP32, val packetID: Int) {
+abstract class SendablePacket(private val controller: ESP32, val packetID: Byte) {
     protected var writeCharacteristic: BluetoothGattCharacteristic? = null
 
     init {
@@ -28,6 +28,26 @@ abstract class SendablePacket(private val controller: ESP32, val packetID: Int) 
         )
     }
 
+    @ExperimentalUnsignedTypes
+    protected fun longToByteList(long: ULong) : List<Byte> {
+        var tmp = long
+        val list = ArrayList<Byte>()
+        for (i in 0..7) {
+            list.add(0, (tmp % 256u).toByte())
+            tmp /= 256u
+        }
+        return list
+    }
+    @ExperimentalUnsignedTypes
+    protected fun intToByteList(int: UInt) : List<Byte> {
+        var tmp = int
+        val list = ArrayList<Byte>()
+        for (i in 0..3) {
+            list.add(0, (tmp % 256u).toByte())
+            tmp /= 256u
+        }
+        return list
+    }
     protected fun shortToByteList(short: Int) : List<Byte> {
         val list = ArrayList<Byte>()
         list.add(((short / 256).toByte()))

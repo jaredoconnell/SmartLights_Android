@@ -41,17 +41,29 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
+                android:gravity="start"
                 >
-                <Button
+                <ImageView
                     android:id="@+id/set_colors_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:shadowColor="#888"
-                    android:shadowDx="-2"
-                    android:shadowDy="2"
-                    android:shadowRadius="0.1"
-                    android:text="@string/set_colors"/>
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/ic_baseline_bookmarks_24"
+                    android:contentDescription="@string/set_colors_button_description" />
+                <ImageView
+                    android:id="@+id/set_color_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/ic_baseline_color_lens_24"
+                    android:contentDescription="@string/set_color_button_description" />
+                <ImageView
+                    android:id="@+id/edit_schedules_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/ic_baseline_timer_24"
+                    android:contentDescription="@string/edit_timers_button_description" />
             </LinearLayout>
 
             <LinearLayout
@@ -61,7 +73,8 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_baseline_brightness_low_24"/>
+                    app:srcCompat="@drawable/ic_baseline_brightness_low_24"
+                    android:contentDescription="@string/dim_icon" />
                 <SeekBar
                     android:id="@+id/brightness_bar"
                     android:layout_width="0dp"

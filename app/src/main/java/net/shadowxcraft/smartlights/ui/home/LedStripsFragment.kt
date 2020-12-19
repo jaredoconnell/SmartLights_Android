@@ -16,13 +16,16 @@ import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
+import net.shadowxcraft.smartlights.ui.schedules.SchedulesFragment
 
 
-class LedStripsFragment : Fragment(), ButtonClickListener {
+class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.ColorSelectedListener {
 
     var adapter: LEDStripListAdapter? = null
 
     private lateinit var ledStripsViewModel: LedStripViewModel
+
+    var dialog: ColorEditorDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,7 +82,27 @@ class LedStripsFragment : Fragment(), ButtonClickListener {
 
     override fun onButtonClicked(position: Int, itemId: Int) {
         val ledStrip = adapter!!.getNthLEDStrip(position)
-        Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
+        when (itemId) {
+            R.id.set_colors_button -> {
+                Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
+            }
+            R.id.set_color_button -> {
+                dialog = ColorEditorDialog(BLEControllerManager.activity!!, ledStrip!!.simpleColor, ledStrip!!)
+                dialog!!.listener = this
+                dialog!!.display()
+            }
+            R.id.edit_schedules_button -> {
+                Utils.replaceFragment(SchedulesFragment(ledStrip), parentFragmentManager)
+            }
+        }
+    }
+
+    override fun onColorSelected(color: Color) {
+        dialog!!.ledStrip!!.simpleColor = color
+        // Clear the preview that likely built up.
+        dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
+        SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0).send()// indefinitely
+        adapter?.notifyDataSetChanged()
     }
 
     /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -104,21 +127,18 @@ class LEDStripListAdapter(
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     inner class ViewHolder(itemView: View)
-        : RecyclerView.ViewHolder(itemView), View.OnClickListener,
-        ColorEditorDialog.ColorSelectedListener
+        : RecyclerView.ViewHolder(itemView)
     {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        val nameView: TextView = itemView.findViewById(R.id.led_strip_name)
-        val colorsButtonView: Button = itemView.findViewById(R.id.set_colors_button)
-        val offOnStateToggle: Switch = itemView.findViewById(R.id.on_off_switch)
+        private val nameView: TextView = itemView.findViewById(R.id.led_strip_name)
+        private val colorsButtonView: ImageView = itemView.findViewById(R.id.set_colors_button)
+        private val colorButtonView: ImageView = itemView.findViewById(R.id.set_color_button)
+        private val editSchedulesView: ImageView = itemView.findViewById(R.id.edit_schedules_button)
+        private val offOnStateToggle: Switch = itemView.findViewById(R.id.on_off_switch)
         val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
-        var ledStrip: LEDStrip? = null
-        override fun onClick(v: View?) {
-            val dialog = ColorEditorDialog(activity!!, ledStrip!!.simpleColor, ledStrip!!)
-            dialog.listener = this
-            dialog.display()
-        }
+        private var ledStrip: LEDStrip? = null
+
 
         fun setLEDStrip(ledStrip: LEDStrip) {
             this.ledStrip = ledStrip
@@ -157,15 +177,15 @@ class LEDStripListAdapter(
                 }
             })
             colorsButtonView.setOnClickListener {
-                setColorClickListener.onButtonClicked(position, R.id.set_colors_button)
+                setColorClickListener.onButtonClicked(adapterPosition, R.id.set_colors_button)
             }
-        }
-
-        override fun onColorSelected(color: Color) {
-            ledStrip!!.simpleColor = color
-            // Clear the preview that likely built up.
-            ledStrip!!.controller.clearQueueForPacketID(19)
-            SetColorForLEDStripPacket(ledStrip!!, color, 0).send()// indefinitely
+            colorButtonView.setOnClickListener {
+                setColorClickListener.onButtonClicked(adapterPosition, R.id.set_color_button)
+            }
+            editSchedulesView.setOnClickListener {
+                setColorClickListener.onButtonClicked(adapterPosition, R.id.edit_schedules_button)
+            }
+            colorButtonView.drawable.setTint(ledStrip.simpleColor.toArgb())
         }
     }
 
@@ -204,7 +224,6 @@ class LEDStripListAdapter(
         val component: LEDStrip = getNthLEDStrip(position)
             // Set item views based on your views and data model
         holder.setLEDStrip(component)
-        holder.itemView.setOnClickListener(holder)
 
         /*holder.colorView.setBackgroundColor(android.graphics.Color.argb(255, color.red, color.green, color.blue))
         holder.driverView.text = component.driver.i2cAddress.toString()

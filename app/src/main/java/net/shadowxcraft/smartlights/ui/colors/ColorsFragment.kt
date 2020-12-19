@@ -17,16 +17,17 @@ import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.edit_color_sequence.ColorSequenceEditorFragment
 import java.util.*
 
-class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListener, ClickListener {
+class ColorsFragment(private val strip: LEDStrip? = null,
+                     private val scheduledChange: ScheduledChange? = null):
+    Fragment(), ButtonClickListener, ClickListener
+{
     private var adapter: ColorsListListAdapter? = null
-
-    constructor() : this(null)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val currentView: View = inflater.inflate(R.layout.fragment_color_sequence_list, container, false)
         if (strip != null) {
             val addButton: View = currentView.findViewById(R.id.add_color_sequence)
@@ -37,7 +38,8 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
                         requireActivity(),
                         ColorSequence(UUID.randomUUID().toString(), ""),
                         strip.controller,
-                        strip
+                        strip,
+                        scheduledChange
                     ), parentFragmentManager
                 )
             }
@@ -69,13 +71,21 @@ class ColorsFragment(private val strip: LEDStrip?): Fragment(), ButtonClickListe
         val selectedSequence = strip!!.controller.colorsSequences.values.toTypedArray()[position]
 
         Utils.replaceFragment(ColorSequenceEditorFragment(requireActivity(),
-            selectedSequence, strip.controller, strip), parentFragmentManager)
+            selectedSequence, strip.controller, strip, scheduledChange), parentFragmentManager)
     }
 
     override fun onPositionClicked(position: Int) {
-        // Set the color sequence for the LED strip
-        strip!!.currentSeq = strip!!.controller.colorsSequences.values.toTypedArray()[position]
-        SetColorSequenceForLEDStripPacket(strip).send()
+        val correctStrip = strip ?: (scheduledChange?.ledStrip ?: return)
+        val selected = correctStrip.controller.colorsSequences.values.toTypedArray()[position]
+        if (scheduledChange == null) {
+            // Set the color sequence for the LED strip
+            strip!!.currentSeq = selected
+            SetColorSequenceForLEDStripPacket(correctStrip).send()
+        } else {
+            // Sets the color sequence for the scheduled change
+            scheduledChange.newColorSequenceID = selected.id
+            activity?.supportFragmentManager?.popBackStack()
+        }
     }
 }
 

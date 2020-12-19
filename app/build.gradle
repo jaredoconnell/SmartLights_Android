@@ -49,6 +49,7 @@ dependencies {
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation "com.github.weliem:blessed-android:1.19"
     implementation 'com.github.madrapps:pikolo:2.0.1'
+    implementation 'net.danlew:android.joda:2.10.7.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SmartLights</string>
     <string name="title_led_strips">Led Strips</string>
-    <string name="title_timers">Timers</string>
+    <string name="title_groups">Groups</string>
     <string name="title_notifications">Notifications</string>
     <string name="manage_bluetooth">Manage Bluetooth Light Controllers</string>
 
@@ -28,8 +28,10 @@
     <string name="connect">Connect</string>
     <string name="set_colors">Set Colors</string>
     <string name="color_sequences" >Color Sequences</string>
+    <string name="schedules" >Schedules</string>
     <string name="edit">Edit</string>
     <string name="edit_color_sequence">Edit Color Sequence</string>
+    <string name="edit_scheduled_change">Edit Scheduled Change</string>
     <string name="name_color_sequence_field">Color Sequence Name</string>
     <string name="the_color_preview">The color preview</string>
     <string name="color_preview_view_explanation">A preview of the color</string>
@@ -43,4 +45,10 @@
     <string name="color_temp_background_description">The color temp background</string>
     <string name="sustain_time_label">Sustain Time (Minutes:Seconds:60ths)</string>
     <string name="add_color_hint">Click the + to add a color</string>
+    <string name="dim_icon">Icon for dim brightness</string>
+    <string name="set_colors_button_description">Button to open saved colors</string>
+    <string name="set_color_button_description">Button to set the current color of LED Strip</string>
+    <string name="edit_timers_button_description">The button to edit timers</string>
+    <string name="name_scheduled_change_field">Name of Scheduled Change</string>
+    <string name="title_settings">Settings</string>
 </resources>

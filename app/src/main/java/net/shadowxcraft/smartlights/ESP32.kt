@@ -31,7 +31,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     val ledStrips: TreeMap<String, LEDStrip> = TreeMap()
     val colorsSequences: TreeMap<String, ColorSequence> = TreeMap()
     val queuedPackets: SparseArray<SendablePacket> = SparseArray()
-    var pins: TreeMap<String, Int> = TreeMap()
+    private var pins: TreeMap<String, Int> = TreeMap()
 
     private val queuedPacketsTimer = Timer()
 
@@ -182,6 +182,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
 
         exec.schedule({
             // Delay in case the requested mtu has not applied.
+            SendTimePacket(this).send()
             requestDataFromDriver()
             checkName(BLEControllerManager.externConnectionListener)
         }, 2, TimeUnit.SECONDS)
@@ -192,6 +193,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         GetColorSequences(this).send();
         GetPWMDrivers(this).send();
         GetLEDStrips(this).send();
+        GetScheduledSequences(this).send()
     }
 
     fun saveToDB(context: Context) {
@@ -208,7 +210,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * only the latest packets should be sent.
      */
     fun queuePacket(packet: SendablePacket) {
-        queuedPackets[packet.packetID] = packet
+        queuedPackets[packet.packetID.toInt()] = packet
     }
 
     fun clearQueueForPacketID(id: Int) {
@@ -271,6 +273,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
             254 -> LEDStripsListResponse(this, value)
             252 -> LEDStripColorSequenceListResponse(this, value)
             251 -> ColorSequenceListResponse(this, value)
+            250 -> ScheduledChangeListResponse(this, value)
             else -> throw IllegalStateException("Unknown packet ID ${value[0].toInt()}")
         }
     }

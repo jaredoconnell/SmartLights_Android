@@ -1,6 +1,7 @@
 package net.shadowxcraft.smartlights.packets
 
 import android.bluetooth.BluetoothGattCharacteristic
+import com.welie.blessed.WriteType
 import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.Color
 import net.shadowxcraft.smartlights.ESP32
@@ -23,8 +24,8 @@ abstract class SendablePacket(private val controller: ESP32, val packetID: Byte)
 
     protected fun sendData(data: ByteArray) {
         controller.device!!.writeCharacteristic(
-            writeCharacteristic, data,
-            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            writeCharacteristic!!, data,
+            WriteType.WITH_RESPONSE
         )
     }
 

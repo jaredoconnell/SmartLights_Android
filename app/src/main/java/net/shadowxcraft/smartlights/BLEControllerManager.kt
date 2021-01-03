@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothCentralCallback
 import com.welie.blessed.BluetoothPeripheral
+import com.welie.blessed.HciStatus
 import java.util.*
 
 
@@ -76,7 +77,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
     fun connectTo(device: BluetoothPeripheral): Boolean {
         if(device.address in connected) {
             val controller = connected[device.address]
-            bluetoothCentral!!.connectPeripheral(controller!!.device, controller)
+            bluetoothCentral!!.connectPeripheral(controller!!.device!!, controller)
             if (device.bondState == BluetoothPeripheral.BOND_NONE)
                 device.createBond()
             return false
@@ -84,7 +85,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
             val newController = ESP32(activity!!)
             newController.device = device
             connected[device.address] = newController
-            bluetoothCentral!!.connectPeripheral(newController.device, newController)
+            bluetoothCentral!!.connectPeripheral(newController.device!!, newController)
             device.createBond()
             activity?.runOnUiThread {
                 Toast.makeText(
@@ -106,10 +107,10 @@ object BLEControllerManager : BluetoothCentralCallback() {
     }
 
     override fun onDiscoveredPeripheral(
-        peripheral: BluetoothPeripheral?,
-        scanResult: ScanResult?
+        peripheral: BluetoothPeripheral,
+        scanResult: ScanResult
     ) {
-        this.externScanListener?.onPeripheralDiscovered(peripheral!!, scanResult!!)
+        this.externScanListener?.onPeripheralDiscovered(peripheral, scanResult)
     }
 
     override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
@@ -120,7 +121,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
                 Toast.LENGTH_SHORT
             ).show()
         }
-        var controller = connected[peripheral.address]
+        val controller = connected[peripheral.address]
         if (controller != null && !ControllerManager.controllers.contains(controller)) {
             ControllerManager.controllers.add(controller)
             externConnectionListener?.onControllerChange(controller)
@@ -129,7 +130,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
         controller!!.onConnection()
     }
 
-    override fun onConnectionFailed(peripheral: BluetoothPeripheral?, status: Int) {
+    override fun onConnectionFailed(peripheral: BluetoothPeripheral, status: HciStatus) {
         activity?.runOnUiThread {
             Toast.makeText(
                 activity,
@@ -139,7 +140,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
         }
     }
 
-    override fun onDisconnectedPeripheral(peripheral: BluetoothPeripheral?, status: Int) {
+    override fun onDisconnectedPeripheral(peripheral: BluetoothPeripheral, status: HciStatus) {
         activity?.runOnUiThread {
             Toast.makeText(
                 activity,
@@ -147,11 +148,8 @@ object BLEControllerManager : BluetoothCentralCallback() {
                 Toast.LENGTH_SHORT
             ).show()
         }
-        if (peripheral != null) {
-            val controller = connected[peripheral.address]
-            bluetoothCentral!!.connectPeripheral(peripheral, controller)
-        }
-
+        val controller = connected[peripheral.address]
+        bluetoothCentral!!.connectPeripheral(peripheral, controller!!)
     }
 
     fun setConnectionListener(listener: BluetoothConnectionListener) {

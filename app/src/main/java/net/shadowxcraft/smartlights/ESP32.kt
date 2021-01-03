@@ -13,6 +13,7 @@ import androidx.core.util.isNotEmpty
 import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
+import com.welie.blessed.GattStatus
 import net.shadowxcraft.smartlights.packets.*
 import java.util.*
 import java.util.concurrent.Executors
@@ -171,7 +172,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         // Makes sure proper communication is possible, then makes sure it's all up to date.
         device?.requestMtu(512)
         if (device != null) {
-            name = device!!.name
+            name = device!!.name!!
         }
         Toast.makeText(BLEControllerManager.activity,
             "Connected.",
@@ -221,25 +222,22 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * Bluetooth events
      */
 
-    override fun onCharacteristicWrite(
-        peripheral: BluetoothPeripheral?,
-        value: ByteArray?,
-        characteristic: BluetoothGattCharacteristic?,
-        status: Int
-    ) {
-        // TODO: Validate that it sent properly.
-
-
-    }
-
-    override fun onServicesDiscovered(peripheral: BluetoothPeripheral?) {
+    override fun onServicesDiscovered(peripheral: BluetoothPeripheral) {
         this.device = peripheral
         Log.println(Log.INFO, "ESP32", "onServicesDiscovered")
-        val readCharacteristic = peripheral!!.getCharacteristic(
+        val readCharacteristic = peripheral.getCharacteristic(
             BLEControllerManager.SERVICE_UUID,
             BLEControllerManager.TO_PHONE_UUID
         )
-        peripheral.setNotify(readCharacteristic, true)
+        if (readCharacteristic != null) {
+            peripheral.setNotify(readCharacteristic, true)
+        } else {
+            Toast.makeText(
+                BLEControllerManager.activity,
+                "Characteristic is null",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         /*peripheral.readCharacteristic(readCharacteristic)
         val writeCharacteristic = peripheral.getCharacteristic(
             BLEControllerManager.SERVICE_UUID,
@@ -258,9 +256,9 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * @param status GATT status code
      */
     override fun onNotificationStateUpdate(
-        peripheral: BluetoothPeripheral?,
-        characteristic: BluetoothGattCharacteristic?,
-        status: Int
+        peripheral: BluetoothPeripheral,
+        characteristic: BluetoothGattCharacteristic,
+        status: GattStatus
     ) {
         Log.println(Log.INFO, "ESP32", "onNotificationStateUpdate")
         device!!.readCharacteristic(characteristic)
@@ -290,10 +288,10 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * @param status GATT status code
      */
     override fun onCharacteristicUpdate(
-        peripheral: BluetoothPeripheral?,
-        value: ByteArray?,
-        characteristic: BluetoothGattCharacteristic?,
-        status: Int
+        peripheral: BluetoothPeripheral,
+        value: ByteArray,
+        characteristic: BluetoothGattCharacteristic,
+        status: GattStatus
     ) {
         Log.println(Log.INFO, "ESP32", "onCharacteristicUpdate got packet!")
         val packet: ReceivedPacket? = value?.let { getPacket(it) }
@@ -315,10 +313,10 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * @param status GATT status code
      */
     override fun onDescriptorRead(
-        peripheral: BluetoothPeripheral?,
-        value: ByteArray?,
-        descriptor: BluetoothGattDescriptor?,
-        status: Int
+        peripheral: BluetoothPeripheral,
+        value: ByteArray,
+        descriptor: BluetoothGattDescriptor,
+        status: GattStatus
     ) {
         Log.println(Log.INFO, "ESP32", "onDescriptorRead")
     }
@@ -333,10 +331,10 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * @param status the GATT status code
      */
     override fun onDescriptorWrite(
-        peripheral: BluetoothPeripheral?,
-        value: ByteArray?,
-        descriptor: BluetoothGattDescriptor?,
-        status: Int
+        peripheral: BluetoothPeripheral,
+        value: ByteArray,
+        descriptor: BluetoothGattDescriptor,
+        status: GattStatus
     ) {
         Log.println(Log.INFO, "ESP32", "onDescriptorWrite")
     }
@@ -346,7 +344,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      *
      * @param peripheral the peripheral
      */
-    override fun onBondingStarted(peripheral: BluetoothPeripheral?) {
+    override fun onBondingStarted(peripheral: BluetoothPeripheral) {
         Log.println(Log.INFO, "ESP32", "onBondingStarted")
         Toast.makeText(
             BLEControllerManager.activity,
@@ -360,7 +358,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      *
      * @param peripheral the peripheral
      */
-    override fun onBondingSucceeded(peripheral: BluetoothPeripheral?) {
+    override fun onBondingSucceeded(peripheral: BluetoothPeripheral) {
         Log.println(Log.INFO, "ESP32", "onBondingSucceeded")
         Toast.makeText(
             BLEControllerManager.activity,
@@ -374,7 +372,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      *
      * @param peripheral the peripheral
      */
-    override fun onBondingFailed(peripheral: BluetoothPeripheral?) {
+    override fun onBondingFailed(peripheral: BluetoothPeripheral) {
         Log.println(Log.INFO, "ESP32", "onBondingFailed")
         Toast.makeText(
             BLEControllerManager.activity,
@@ -388,7 +386,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      *
      * @param peripheral the peripheral
      */
-    override fun onBondLost(peripheral: BluetoothPeripheral?) {
+    override fun onBondLost(peripheral: BluetoothPeripheral) {
         Log.println(Log.INFO, "ESP32", "onBondLost")
         Toast.makeText(
             BLEControllerManager.activity,
@@ -405,9 +403,9 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * @param status GATT status code
      */
     override fun onReadRemoteRssi(
-        peripheral: BluetoothPeripheral?,
+        peripheral: BluetoothPeripheral,
         rssi: Int,
-        status: Int
+        status: GattStatus
     ) {
         Log.println(Log.INFO, "ESP32", "onReadRemoteRssi")
     }
@@ -418,7 +416,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
      * @param mtu the new MTU
      * @param status GATT status code
      */
-    override fun onMtuChanged(peripheral: BluetoothPeripheral?, mtu: Int, status: Int) {
+    override fun onMtuChanged(peripheral: BluetoothPeripheral, mtu: Int, status: GattStatus) {
         Log.println(Log.INFO, "ESP32", "onMtuChanged")
     }
 

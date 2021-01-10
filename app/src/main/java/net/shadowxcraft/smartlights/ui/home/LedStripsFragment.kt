@@ -185,7 +185,7 @@ class LEDStripListAdapter(
             editSchedulesView.setOnClickListener {
                 setColorClickListener.onButtonClicked(adapterPosition, R.id.edit_schedules_button)
             }
-            colorButtonView.drawable.setTint(ledStrip.simpleColor.toArgb())
+            colorButtonView.drawable.mutate().setTint(ledStrip.simpleColor.toArgb())
         }
     }
 

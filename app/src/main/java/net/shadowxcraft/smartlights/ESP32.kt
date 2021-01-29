@@ -30,6 +30,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     private val pwmDriversByAddress: TreeMap<Int, PinDriver> = TreeMap()
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
     val ledStrips: TreeMap<String, LEDStrip> = TreeMap()
+    val ledStripGroups: TreeMap<String, LEDStripGroup> = TreeMap()
     val colorsSequences: TreeMap<String, ColorSequence> = TreeMap()
     val queuedPackets: SparseArray<SendablePacket> = SparseArray()
     private var pins: TreeMap<String, Int> = TreeMap()
@@ -140,6 +141,18 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
             AddLEDStripPacket(this, strip).send()
     }
 
+     /**
+     * Stores the LED strip, then sends the LED strip to the controller.
+     */
+    fun addLEDStripGroup(group: LEDStripGroup, sendPacket: Boolean) {
+        if (ledStrips.containsKey(group.id)) {
+            // Maybe throw error in the future
+            Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
+        }
+        ledStripGroups[group.id] = group
+        act.ledStripGroupsFragment?.adapter?.notifyDataSetChanged()
+    }
+
     fun addColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
         //if (!colorsSequences.contains(colorSequence.id)) {
         colorsSequences[colorSequence.id] = colorSequence
@@ -206,6 +219,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         GetColorSequences(this).send();
         GetPWMDrivers(this).send();
         GetLEDStrips(this).send();
+        GetLEDStripGroups(this).send();
         GetScheduledSequences(this).send()
     }
 
@@ -284,6 +298,7 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
             252 -> LEDStripColorSequenceListResponse(this, value)
             251 -> ColorSequenceListResponse(this, value)
             250 -> ScheduledChangeListResponse(this, value)
+            245 -> LEDStripGroupsListResponse(this, value)
             else -> throw IllegalStateException("Unknown packet ID ${value[0].toInt()}")
         }
     }

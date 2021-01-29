@@ -9,12 +9,13 @@ import kotlin.math.roundToInt
 
 const val MAX_BRIGHTNESS = 4095
 
-class LEDStrip(val id: String, val name: String, val components: ArrayList<LEDStripComponent>,
-               var currentSeq: ColorSequence?, val controller: ESP32)
+open class LEDStrip(val id: String, val name: String,
+                    open var currentSeq: ColorSequence?, val controller: ESP32)
 {
+    val components = ArrayList<LEDStripComponent>()
     var brightness = MAX_BRIGHTNESS
-    var onState = true
-    var simpleColor = Color(255, 0, 0)
+    open var onState = true
+    open var simpleColor = Color(255, 0, 0)
     val scheduledChanges = TreeMap<String, ScheduledChange>()
 
     fun convertToLinear(exponentialInput: Int): Int {
@@ -34,7 +35,7 @@ class LEDStrip(val id: String, val name: String, val components: ArrayList<LEDSt
      * and it will interpret that as on an exponential scale,
      * then convert that to linear.
      */
-    fun setBrightnessExponential(exponentialInput: Int) {
+    open fun setBrightnessExponential(exponentialInput: Int) {
         brightness = convertToLinear(exponentialInput)
         Log.println(Log.INFO,"LEDStrip", "Set brightness to $brightness")
     }

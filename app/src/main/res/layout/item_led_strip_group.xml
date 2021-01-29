@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/led_strip_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingBottom="9dp"
+                android:text="Name"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            >
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/set_colors_button"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/ic_baseline_bookmarks_24"
+                    android:contentDescription="@string/set_colors_button_description" />
+                <ImageView
+                    android:id="@+id/set_color_button"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/ic_baseline_color_lens_24"
+                    android:contentDescription="@string/set_color_button_description" />
+                <ImageView
+                    android:id="@+id/edit_schedules_button"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_margin="8dp"
+                    app:srcCompat="@drawable/ic_baseline_timer_24"
+                    android:contentDescription="@string/edit_timers_button_description" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/on_off_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/turn_off"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_baseline_brightness_low_24"
+                android:contentDescription="@string/dim_icon" />
+            <SeekBar
+                android:id="@+id/brightness_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:max="4095"
+                android:progress="4095"
+                android:progressTint="@color/colorPrimary"
+                android:progressBackgroundTint="@color/colorPrimary"
+                android:secondaryProgressTint="@color/colorPrimary"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_baseline_brightness_high_24"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

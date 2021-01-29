@@ -21,6 +21,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
 import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
+import net.shadowxcraft.smartlights.ui.led_strip_groups.LedStripGroupsFragment
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.lang.Exception
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
     BluetoothFragment.OnFragmentInteractionListener, SensorEventListener {
 
     var ledStripsFragment: LedStripsFragment? = null
+    var ledStripGroupsFragment: LedStripGroupsFragment? = null
     private lateinit var sensorManager: SensorManager
     private var lightSensor: Sensor? = null
     private var lastLuxVal = 0.0f
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home
+                R.id.navigation_home, R.id.navigation_groups
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

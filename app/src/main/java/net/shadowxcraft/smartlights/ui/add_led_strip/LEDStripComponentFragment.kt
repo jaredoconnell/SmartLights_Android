@@ -100,7 +100,8 @@ class LEDStripComponentFragment(val controller: ESP32) : Fragment() {
                 }
                 else -> {
                     val nextID = UUID.randomUUID().toString()
-                    val newStrip = LEDStrip(nextID, name, components, null, controller)
+                    val newStrip = LEDStrip(nextID, name, null, controller)
+                    newStrip.components.addAll(components)
                     controller.addLEDStrip(newStrip, true)
                     (context as MainActivity).supportFragmentManager.popBackStack()
                 }

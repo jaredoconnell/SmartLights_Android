@@ -64,7 +64,8 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
             null
         }
 
-        val newLEDStrip = LEDStrip(id, name, components, currentSequence, controller)
+        val newLEDStrip = LEDStrip(id, name, currentSequence, controller)
+        newLEDStrip.components.addAll(components)
 
         newLEDStrip.onState = isOn
         newLEDStrip.brightness = brightness
@@ -72,6 +73,24 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
             newLEDStrip.simpleColor = tempColor
 
         return newLEDStrip
+    }
+
+    protected fun bytesToLEDStripGroup() : LEDStripGroup {
+        val id = bytesToStr()
+        val name = bytesToStr()
+        val numLEDStrips = getByte()
+        val ledStrips = ArrayList<LEDStrip>()
+        for (i in 1..numLEDStrips) {
+            val ledStripID = bytesToStr()
+            val ledStrip = controller.ledStrips[ledStripID]
+            if (ledStrip != null) {
+                ledStrips.add(ledStrip)
+            } else {
+                Log.println(Log.WARN, "ReceivedPacket", "Could not find LED Strip" +
+                        " matching that ID in Led Strip Group packet.")
+            }
+        }
+        return LEDStripGroup(id, name, ledStrips, controller)
     }
 
     protected fun bytesToColorSequence() : ColorSequence {
@@ -128,6 +147,9 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
 
         val ledStripID = bytesToStr()
         sc.ledStrip = controller.ledStrips[ledStripID]
+        if (sc.ledStrip == null) {
+            sc.ledStrip = controller.ledStripGroups[ledStripID]
+        }
 
         val changes = getByte()
         val turnOn = changes and 0b00000001 > 0

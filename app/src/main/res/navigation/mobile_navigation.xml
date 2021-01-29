@@ -11,11 +11,11 @@
         android:label="@string/title_led_strips"
         tools:layout="@layout/fragment_led_strips" />
 
-    <!--<fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="net.shadowxcraft.smartlights.ui.dashboard.DashboardFragment"
-        android:label="@string/title_timers"
-        tools:layout="@layout/fragment_timers" />-->
+    <fragment
+        android:id="@+id/navigation_groups"
+        android:name="net.shadowxcraft.smartlights.ui.led_strip_groups.LedStripGroupsFragment"
+        android:label="@string/title_groups"
+        tools:layout="@layout/fragment_led_strips" />
 
     <!--<fragment
         android:id="@+id/navigation_notifications"

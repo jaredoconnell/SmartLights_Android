@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,8 +22,6 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
 
     var adapter: LEDStripListAdapter? = null
 
-    private lateinit var ledStripsViewModel: LedStripViewModel
-
     var dialog: ColorEditorDialog? = null
 
     override fun onCreateView(
@@ -32,13 +29,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        ledStripsViewModel =
-            ViewModelProviders.of(this).get(LedStripViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_led_strips, container, false)
-        val textView: TextView = root.findViewById(R.id.text_led_strips)
-        ledStripsViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
 
         setHasOptionsMenu(true)
 

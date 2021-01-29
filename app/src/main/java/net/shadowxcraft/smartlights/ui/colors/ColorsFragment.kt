@@ -60,7 +60,7 @@ class ColorsFragment(private val strip: LEDStrip? = null,
             // Set layout manager to position the items
             rvControllers.layoutManager = LinearLayoutManager(context)
         } else {
-            activity?.supportFragmentManager?.popBackStack();
+            activity?.supportFragmentManager?.popBackStack()
         }
 
         return currentView

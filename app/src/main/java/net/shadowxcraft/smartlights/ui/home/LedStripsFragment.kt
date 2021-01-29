@@ -90,6 +90,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
 
     override fun onColorSelected(color: Color) {
         dialog!!.ledStrip!!.simpleColor = color
+        dialog!!.ledStrip!!.currentSeq = null
         // Clear the preview that likely built up.
         dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
         SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0).send()// indefinitely

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -16,6 +17,7 @@ import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.edit_color_sequence.ColorSequenceEditorFragment
 import java.util.*
+import kotlin.math.round
 
 class ColorsFragment(private val strip: LEDStrip? = null,
                      private val scheduledChange: ScheduledChange? = null):
@@ -44,7 +46,7 @@ class ColorsFragment(private val strip: LEDStrip? = null,
                 )
             }
             // Create adapter passing in the led strip components
-            adapter = ColorsListListAdapter(strip.controller, this, this)
+            adapter = ColorsListListAdapter(strip.controller, this, this, strip, scheduledChange)
 
             // Lookup the recyclerview in activity layout
             val rvControllers = currentView.findViewById(R.id.list_color_sequences) as RecyclerView
@@ -79,13 +81,19 @@ class ColorsFragment(private val strip: LEDStrip? = null,
         val selected = correctStrip.controller.colorsSequences.values.toTypedArray()[position]
         if (scheduledChange == null) {
             // Set the color sequence for the LED strip
-            strip!!.currentSeq = selected
-            SetColorSequenceForLEDStripPacket(correctStrip).send()
+            if (strip!!.currentSeq == selected) {
+                // Already selected, so exit.
+                activity?.supportFragmentManager?.popBackStack()
+            } else {
+                strip.currentSeq = selected
+                SetColorSequenceForLEDStripPacket(correctStrip).send()
+            }
         } else {
             // Sets the color sequence for the scheduled change
             scheduledChange.newColorSequenceID = selected.id
             activity?.supportFragmentManager?.popBackStack()
         }
+        adapter?.notifyDataSetChanged()
     }
 }
 
@@ -94,7 +102,8 @@ class ColorsFragment(private val strip: LEDStrip? = null,
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
 class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListener,
-                            private val buttonClickListener: ButtonClickListener)
+                            private val buttonClickListener: ButtonClickListener,
+                            private val strip: LEDStrip?, private val scheduledChange: ScheduledChange?)
     : RecyclerView.Adapter<ColorsListListAdapter.ViewHolder?>()
 {
 
@@ -107,6 +116,7 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
         var timeView: TextView = itemView.findViewById(R.id.item_color_sequence_duration)
         var imgView: ImageView = itemView.findViewById(R.id.item_color_sequence_preview)
         var editButton: Button = itemView.findViewById(R.id.item_color_sequence_edit_button)
+        var selectedCheckbox: CheckBox = itemView.findViewById(R.id.color_sequence_selected_checkbox)
         override fun onClick(v: View?) {
             clickListener.onPositionClicked(adapterPosition)
         }
@@ -139,8 +149,14 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
 
         // Set item views based on your views and data model
         holder.nameView.text = sequence.name
-        holder.timeView.text = "Duration: ${sequence.getDuration()}s"
+        holder.timeView.text = "Duration:\n${round(sequence.getDuration())}s"
         holder.imgView.setImageDrawable(sequence.getDrawableRepresentation())
+        if (scheduledChange != null) {
+            holder.selectedCheckbox.isChecked = scheduledChange.newColorSequenceID == sequence.id
+        } else if (strip != null)
+            holder.selectedCheckbox.isChecked = strip.currentSeq == sequence
+        else
+            holder.selectedCheckbox.visibility = View.GONE
         holder.editButton.setOnClickListener {
             buttonClickListener.onButtonClicked(position, R.id.item_color_sequence_edit_button)
         }

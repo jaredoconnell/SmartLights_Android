@@ -23,10 +23,16 @@ abstract class SendablePacket(private val controller: ESP32, val packetID: Byte)
     abstract fun send();
 
     protected fun sendData(data: ByteArray) {
-        controller.device!!.writeCharacteristic(
-            writeCharacteristic!!, data,
-            WriteType.WITH_RESPONSE
-        )
+        writeCharacteristic?.let {
+            controller.device!!.writeCharacteristic(
+                it, data,
+                WriteType.WITH_RESPONSE
+            )
+        }
+        if (writeCharacteristic == null)
+            controller.reconnect()
+        else
+            controller.checkConnection()
     }
 
     @ExperimentalUnsignedTypes

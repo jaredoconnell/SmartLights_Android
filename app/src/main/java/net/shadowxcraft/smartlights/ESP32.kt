@@ -64,6 +64,18 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
         }, 200, 100)
     }
 
+    fun checkConnection() {
+        if (device?.state == BluetoothPeripheral.STATE_DISCONNECTED) {
+            reconnect()
+        }
+    }
+
+    fun reconnect() {
+        if (device == null)
+            Log.println(Log.WARN, "ESP32", "Attempted to reconnect, but device is null.")
+        device?.let { BLEControllerManager.connectTo(it) }
+    }
+
     /**
      * Adds a controller.
      * @throws IllegalStateException if a controller with the same address is there.

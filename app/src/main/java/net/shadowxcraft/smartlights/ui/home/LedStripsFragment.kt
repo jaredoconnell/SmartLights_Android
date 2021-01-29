@@ -199,7 +199,7 @@ class LEDStripListAdapter(
         return size
     }
 
-    fun getNthLEDStrip(index: Int) : LEDStrip {
+    fun getNthLEDStrip(index: Int) : LEDStrip? {
         var controllerIndex = 0
         var positionsRemaining = index
         while (ControllerManager.controllers[controllerIndex].ledStrips.size < positionsRemaining) {
@@ -207,15 +207,18 @@ class LEDStripListAdapter(
             controllerIndex++
         }
         val ledStrips = ControllerManager.controllers[controllerIndex].ledStrips
+        if (positionsRemaining >= ledStrips.values.size)
+            return null
         return ledStrips.values.toTypedArray()[positionsRemaining]
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // Get the data model based on position
         // Find the applicable controller
-        val component: LEDStrip = getNthLEDStrip(position)
+        val component: LEDStrip? = getNthLEDStrip(position)
             // Set item views based on your views and data model
-        holder.setLEDStrip(component)
+        if (component != null)
+            holder.setLEDStrip(component)
 
         /*holder.colorView.setBackgroundColor(android.graphics.Color.argb(255, color.red, color.green, color.blue))
         holder.driverView.text = component.driver.i2cAddress.toString()

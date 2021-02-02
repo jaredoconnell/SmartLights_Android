@@ -1,17 +1,12 @@
 package net.shadowxcraft.smartlights
 
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanResult
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothCentralCallback
@@ -76,16 +71,24 @@ object BLEControllerManager : BluetoothCentralCallback() {
 
     fun connectTo(device: BluetoothPeripheral): Boolean {
         if(device.address in connected) {
+            // Already has
             val controller = connected[device.address]
             bluetoothCentral!!.connectPeripheral(controller!!.device!!, controller)
             if (device.bondState == BluetoothPeripheral.BOND_NONE)
                 device.createBond()
             return false
         } else {
-            val newController = ESP32(activity!!)
-            newController.device = device
-            connected[device.address] = newController
-            bluetoothCentral!!.connectPeripheral(newController.device!!, newController)
+            val controller = if (ControllerManager.controllerMap.containsKey(device.address)) {
+                // Never connected, but in the list
+                ControllerManager.controllerMap[device.address]!!
+            } else {
+                // Never connected, not in the list
+                ESP32(activity!!, device.address, device.name ?: DEFAULT_NAME)
+            }
+
+            controller.device = device
+            connected[device.address] = controller
+            bluetoothCentral!!.connectPeripheral(controller.device!!, controller)
             device.createBond()
             activity?.runOnUiThread {
                 Toast.makeText(
@@ -96,10 +99,6 @@ object BLEControllerManager : BluetoothCentralCallback() {
             }
             return true
         }
-    }
-
-    fun processData(byteArray: ByteArray) {
-        println("Got data: $byteArray")
     }
 
     override fun onScanFailed(errorCode: Int) {
@@ -114,16 +113,9 @@ object BLEControllerManager : BluetoothCentralCallback() {
     }
 
     override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
-        activity?.runOnUiThread {
-            Toast.makeText(
-                activity,
-                "Connected!",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
         val controller = connected[peripheral.address]
-        if (controller != null && !ControllerManager.controllers.contains(controller)) {
-            ControllerManager.controllers.add(controller)
+        if (controller != null && !ControllerManager.controllerMap.containsKey(controller.addr)) {
+            ControllerManager.addController(controller)
             externConnectionListener?.onControllerChange(controller)
             controller.saveToDB(activity!!)
         }

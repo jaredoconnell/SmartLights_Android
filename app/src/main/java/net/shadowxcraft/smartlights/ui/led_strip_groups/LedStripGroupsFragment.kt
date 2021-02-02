@@ -54,14 +54,14 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         // Set layout manager to position the items
         rvControllers.layoutManager = LinearLayoutManager(context)
 
-        (activity as MainActivity).ledStripGroupsFragment = this
+        SharedData.ledStripGroupsFragment = this
 
         return root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        (activity as MainActivity).ledStripGroupsFragment = null
+        SharedData.ledStripGroupsFragment = null
     }
 
     override fun onButtonClicked(position: Int, itemId: Int) {

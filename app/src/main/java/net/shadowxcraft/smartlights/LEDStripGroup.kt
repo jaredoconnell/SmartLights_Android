@@ -35,4 +35,8 @@ class LEDStripGroup(id: String, name: String, val ledStrips: ArrayList<LEDStrip>
         }
         super.setBrightnessExponential(exponentialInput)
     }
+
+    override fun saveToDBFull() {
+
+    }
 }

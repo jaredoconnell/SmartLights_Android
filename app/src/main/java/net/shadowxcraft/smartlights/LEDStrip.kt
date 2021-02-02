@@ -40,6 +40,10 @@ open class LEDStrip(val id: String, val name: String,
         Log.println(Log.INFO,"LEDStrip", "Set brightness to $brightness")
     }
 
+    open fun saveToDBFull() {
+
+    }
+
     /**
      * Gets the brightness in a way that matches the
      * exponential brightness.

@@ -56,14 +56,14 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         // Set layout manager to position the items
         rvControllers.layoutManager = LinearLayoutManager(context)
 
-        (activity as MainActivity).ledStripsFragment = this
+        SharedData.ledStripsFragment = this
 
         return root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        (activity as MainActivity).ledStripsFragment = null
+        SharedData.ledStripsFragment = null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

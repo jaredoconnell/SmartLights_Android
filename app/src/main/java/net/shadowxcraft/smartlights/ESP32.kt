@@ -14,6 +14,10 @@ import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
 import com.welie.blessed.GattStatus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.shadowxcraft.smartlights.packets.*
 import java.util.*
 import java.util.concurrent.Executors
@@ -22,11 +26,13 @@ import java.util.concurrent.TimeUnit
 
 const val DEFAULT_NAME: String = "LEDs"
 
-class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinDriver {
+class ESP32(private val act: MainActivity, val addr: String, var name: String)
+    : BluetoothPeripheralCallback(), PinDriver
+{
+    var dbId = -1 // -1 means none yet
     // Bluetooth stuff
     var device: BluetoothPeripheral? = null
     // Other stuff
-    var name: String = DEFAULT_NAME
     private val pwmDriversByAddress: TreeMap<Int, PinDriver> = TreeMap()
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
     val ledStrips: TreeMap<String, LEDStrip> = TreeMap()
@@ -66,15 +72,16 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     }
 
     fun checkConnection() {
-        if (device?.state == BluetoothPeripheral.STATE_DISCONNECTED) {
+        if (device == null || device?.state == BluetoothPeripheral.STATE_DISCONNECTED) {
             reconnect()
         }
     }
 
     fun reconnect() {
         if (device == null)
-            Log.println(Log.WARN, "ESP32", "Attempted to reconnect, but device is null.")
-        device?.let { BLEControllerManager.connectTo(it) }
+            BLEControllerManager.attemptToConnectToAddr(addr)
+        else
+            device?.let { BLEControllerManager.connectTo(it) }
     }
 
     /**
@@ -135,7 +142,17 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
             Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
         }
         ledStrips[strip.id] = strip
-        act.ledStripsFragment?.adapter?.notifyDataSetChanged()
+
+        Log.println(Log.INFO, "ESP32", "About to notify")
+
+        GlobalScope.launch {
+            withContext(Dispatchers.Main) {
+                Log.println(Log.INFO, "ESP32", "Notified")
+                if (SharedData.ledStripsFragment == null)
+                    Log.println(Log.INFO, "ESP32", "Could not notify. Fragment null.")
+                SharedData.ledStripsFragment?.adapter?.notifyDataSetChanged()
+            }
+        }
 
         if (sendPacket)
             AddLEDStripPacket(this, strip).send()
@@ -150,7 +167,11 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
             Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
         }
         ledStripGroups[group.id] = group
-        act.ledStripGroupsFragment?.adapter?.notifyDataSetChanged()
+         GlobalScope.launch {
+             withContext(Dispatchers.Main) {
+                 SharedData.ledStripGroupsFragment?.adapter?.notifyDataSetChanged()
+             }
+         }
     }
 
     fun addColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
@@ -224,12 +245,20 @@ class ESP32(private val act: MainActivity) : BluetoothPeripheralCallback(), PinD
     }
 
     fun saveToDB(context: Context) {
-        val database = SQLiteDB(context).writableDatabase
-        val values = ContentValues()
-        values.put(CONTROLLER_COLUMN_ADDRESS, device!!.address.toString())
-        values.put(CONTROLLER_COLUMN_NAME, name)
-        database.replace(CONTROLLER_TABLE_NAME, null, values)
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                val database = DBHelper(context).writableDatabase
+                val values = ContentValues()
+                values.put(SQLTableData.ControllerEntry.COLUMN_NAME_BLE_ADDR, device!!.address)
+                values.put(SQLTableData.ControllerEntry.COLUMN_NAME_NAME, name)
+                dbId = database.replace(SQLTableData.ControllerEntry.TABLE_NAME, null, values).toInt()
+            }
+        }
     }
+
+    /*private suspend fun saveToDBSuspend(context: Context) {
+
+    }*/
 
     /**
      * Used for queueing a packet that should be ignored if a second of that type shows up.

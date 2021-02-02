@@ -2,6 +2,7 @@ package net.shadowxcraft.smartlights
 
 import android.Manifest
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -18,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.*
 import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
 import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
@@ -31,12 +33,9 @@ const val REQUEST_LOCATION_PERMISSION = 100
 class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentInteractionListener,
     BluetoothFragment.OnFragmentInteractionListener, SensorEventListener {
 
-    var ledStripsFragment: LedStripsFragment? = null
-    var ledStripGroupsFragment: LedStripGroupsFragment? = null
     private lateinit var sensorManager: SensorManager
     private var lightSensor: Sensor? = null
     private var lastLuxVal = 0.0f
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +57,69 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         navView.setupWithNavController(navController)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         requestLocationPermission()
+
+        if (!SharedData.loaded) {
+            initLoadFromDB()
+        }
+        Log.println(Log.INFO, "MainActivity", "Activity created.")
+    }
+
+    private fun initLoadFromDB() {
+        GlobalScope.launch {
+            loadFromDB()
+        }
+    }
+
+    private suspend fun loadFromDB() {
+        withContext(Dispatchers.IO) {
+            try {
+                val dbHelper = DBHelper(this@MainActivity)
+                // in thread pool
+                val db = dbHelper.readableDatabase
+                loadDevices(db)
+                //val cursor = db.query(SQLTableData.ControllerEntry.TABLE_NAME,
+                //    null, null, null, null, null, null)
+
+                //Log.println(Log.INFO, "MainActivity", "There are " + cursor.count + " columns")
+
+                //cursor.close()
+                SharedData.loaded = true
+            } catch (any: Exception) {
+                Log.e( "MainActivity", "Exception in loadFromDB", any)
+            }
+        }
+    }
+
+    private fun loadDevices(db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            "id",
+            SQLTableData.ControllerEntry.COLUMN_NAME_BLE_ADDR,
+            SQLTableData.ControllerEntry.COLUMN_NAME_NAME)
+        val cursor = db.query(
+            SQLTableData.ControllerEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(0)
+            val addr = cursor.getString(1)
+            val name = cursor.getString(2)
+
+            if (!ControllerManager.controllerMap.containsKey(addr)) {
+                val newController = ESP32(this, addr, name)
+                newController.dbId = id
+                ControllerManager.addController(newController)
+            }
+        }
+        cursor.close()
+    }
+
+    private fun loadLEDStrips() {
+
     }
 
     override fun onFragmentInteraction(uri: Uri) {
@@ -97,31 +159,8 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         BLEControllerManager.init(this)
 
         Handler().postDelayed({
-            connectToDevices()
+            ControllerManager.connectAll()
         }, 2000)
-    }
-
-    private fun connectToDevices() {
-        val db = SQLiteDB(this)
-        try {
-            db.writableDatabase
-            val database = db.readableDatabase
-            val selectedCols = arrayOf(CONTROLLER_COLUMN_ADDRESS, CONTROLLER_COLUMN_NAME)
-            val cursor = database.query(
-                CONTROLLER_TABLE_NAME,
-                selectedCols,
-                null,
-                null,
-                null,
-                null,
-                null
-            )
-            while (cursor.moveToNext()) {
-                BLEControllerManager.attemptToConnectToAddr(cursor.getString(0))
-            }
-        } catch (any: Exception) {
-
-        }
     }
 
     override fun onResume() {

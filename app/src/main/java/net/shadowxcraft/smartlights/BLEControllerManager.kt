@@ -78,9 +78,9 @@ object BLEControllerManager : BluetoothCentralCallback() {
                 device.createBond()
             return false
         } else {
-            val controller = if (ControllerManager.controllerMap.containsKey(device.address)) {
+            val controller = if (ControllerManager.controllerAddrMap.containsKey(device.address)) {
                 // Never connected, but in the list
-                ControllerManager.controllerMap[device.address]!!
+                ControllerManager.controllerAddrMap[device.address]!!
             } else {
                 // Never connected, not in the list
                 ESP32(activity!!, device.address, device.name ?: DEFAULT_NAME)
@@ -114,7 +114,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
 
     override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
         val controller = connected[peripheral.address]
-        if (controller != null && !ControllerManager.controllerMap.containsKey(controller.addr)) {
+        if (controller != null && !ControllerManager.controllerAddrMap.containsKey(controller.addr)) {
             ControllerManager.addController(controller)
             externConnectionListener?.onControllerChange(controller)
             controller.saveToDB(activity!!)

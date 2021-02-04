@@ -14,6 +14,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.database.getStringOrNull
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -77,6 +78,8 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 // in thread pool
                 val db = dbHelper.readableDatabase
                 loadDevices(db)
+                loadLEDStrips(db)
+                loadLEDStripGroups(db)
                 //val cursor = db.query(SQLTableData.ControllerEntry.TABLE_NAME,
                 //    null, null, null, null, null, null)
 
@@ -109,7 +112,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             val addr = cursor.getString(1)
             val name = cursor.getString(2)
 
-            if (!ControllerManager.controllerMap.containsKey(addr)) {
+            if (!ControllerManager.controllerAddrMap.containsKey(addr)) {
                 val newController = ESP32(this, addr, name)
                 newController.dbId = id
                 ControllerManager.addController(newController)
@@ -118,8 +121,143 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         cursor.close()
     }
 
-    private fun loadLEDStrips() {
+    private fun loadLEDStrips(db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            "uuid",
+            SQLTableData.LEDStripEntry.COLUMN_NAME_NAME,
+            SQLTableData.LEDStripEntry.COLUMN_NAME_CUR_SEQ,
+            SQLTableData.LEDStripEntry.COLUMN_NAME_ON_STATE,
+            SQLTableData.LEDStripEntry.COLUMN_NAME_BRIGHTNESS,
+            SQLTableData.LEDStripEntry.COLUMN_NAME_RGB,
+            SQLTableData.LEDStripEntry.COLUMN_NAME_CONTROLLER
+        )
+        val cursor = db.query(
+            SQLTableData.LEDStripEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            val uuid = cursor.getString(0)
+            val name = cursor.getString(1)
+            val curSeqID = cursor.getStringOrNull(2)
+            val onState = cursor.getInt(3)
+            val brightness = cursor.getInt(4)
+            val colorArgb = cursor.getInt(5)
+            val controllerID = cursor.getInt(6)
 
+            val controller = ControllerManager.controllerIDMap[controllerID]
+            if (controller == null) {
+                Log.println(Log.WARN, "MainActivity",
+                    "Unknown controller ID while loading LED Strip")
+                continue
+            }
+
+            if (!controller.ledStrips.containsKey(uuid)) {
+                val currSeq = if (curSeqID == null) {
+                    null
+                } else {
+                    controller.colorsSequences[curSeqID]
+                }
+
+                val newStrip = LEDStrip( uuid, name, controller)
+                newStrip.setCurrentSeq(currSeq, false)
+                newStrip.setOnState(onState == 1, false)
+                newStrip.setBrightness(brightness, false)
+                newStrip.setSimpleColor(Color(colorArgb), false)
+                controller.addLEDStrip(newStrip, sendPacket=false, save=false)
+            }
+        }
+        cursor.close()
+    }
+    private fun loadLEDStripGroups(db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            "uuid",
+            SQLTableData.LEDStripGroupEntry.COLUMN_NAME_NAME,
+            SQLTableData.LEDStripGroupEntry.COLUMN_NAME_CUR_SEQ,
+            SQLTableData.LEDStripGroupEntry.COLUMN_NAME_ON_STATE,
+            SQLTableData.LEDStripGroupEntry.COLUMN_NAME_BRIGHTNESS,
+            SQLTableData.LEDStripGroupEntry.COLUMN_NAME_RGB,
+            SQLTableData.LEDStripGroupEntry.COLUMN_NAME_CONTROLLER
+        )
+        val cursor = db.query(
+            SQLTableData.LEDStripGroupEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        Log.println(Log.INFO, "MainActivity", "Loading ${cursor.count} groups")
+        while (cursor.moveToNext()) {
+            val uuid = cursor.getString(0)
+            val name = cursor.getString(1)
+            val curSeqID = cursor.getStringOrNull(2)
+            val onState = cursor.getInt(3)
+            val brightness = cursor.getInt(4)
+            val colorArgb = cursor.getInt(5)
+            val controllerID = cursor.getInt(6)
+
+            val controller = ControllerManager.controllerIDMap[controllerID]
+            if (controller == null) {
+                Log.println(Log.WARN, "MainActivity",
+                    "Unknown controller ID while loading LED Strip")
+                continue
+            }
+
+            if (!controller.ledStripGroups.containsKey(uuid)) {
+                val currSeq = if (curSeqID == null) {
+                    null
+                } else {
+                    controller.colorsSequences[curSeqID]
+                }
+
+                val ledStrips = getLEDStripsForGroup(controller, uuid, db)
+
+                val newStrip = LEDStripGroup( uuid, name, ledStrips, controller)
+                newStrip.setCurrentSeq(currSeq, false)
+                newStrip.setOnState(onState == 1, false)
+                newStrip.setBrightness(brightness, false)
+                newStrip.setSimpleColor(Color(colorArgb), false)
+                controller.addLEDStripGroup(newStrip, sendPacket=false, save=false)
+            }
+        }
+        cursor.close()
+    }
+
+    private fun getLEDStripsForGroup(controller: ESP32, groupID: String, db: SQLiteDatabase) : ArrayList<LEDStrip> {
+        val ledStrips = ArrayList<LEDStrip>()
+
+        val selectedCols = arrayOf(
+            SQLTableData.LEDStripGroupItemEntry.COLUMN_NAME_LED_STRIP,
+            SQLTableData.LEDStripGroupItemEntry.COLUMN_NAME_LED_STRIP_GROUP,
+        )
+        val cursor = db.query(
+            SQLTableData.LEDStripGroupItemEntry.TABLE_NAME,
+            selectedCols,
+            "${SQLTableData.LEDStripGroupItemEntry.COLUMN_NAME_LED_STRIP_GROUP}=?",
+            arrayOf(groupID),
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            val stripID = cursor.getString(0)
+            val strip = controller.ledStrips[stripID]
+            if (strip == null) {
+                Log.println(Log.WARN, "MainActivity", "Could not find strip in" +
+                        "getLEDStripsForGroup with GroupID $groupID")
+                break // Just stop here.
+            } else {
+                ledStrips.add(strip)
+            }
+        }
+        cursor.close()
+        return ledStrips
     }
 
     override fun onFragmentInteraction(uri: Uri) {
@@ -159,7 +297,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         BLEControllerManager.init(this)
 
         Handler().postDelayed({
-            ControllerManager.connectAll()
+            //ControllerManager.connectAll()
         }, 2000)
     }
 

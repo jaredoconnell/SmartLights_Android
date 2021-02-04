@@ -7,15 +7,6 @@ import net.shadowxcraft.smartlights.Color
 import net.shadowxcraft.smartlights.ESP32
 
 abstract class SendablePacket(private val controller: ESP32, val packetID: Byte) {
-    protected var writeCharacteristic: BluetoothGattCharacteristic? = null
-
-    init {
-        writeCharacteristic = controller.device!!.getCharacteristic(
-            BLEControllerManager.SERVICE_UUID,
-            BLEControllerManager.TO_ESP32_UUID
-        )
-    }
-
     fun queue() {
         controller.queuePacket(this)
     }
@@ -23,16 +14,20 @@ abstract class SendablePacket(private val controller: ESP32, val packetID: Byte)
     abstract fun send();
 
     protected fun sendData(data: ByteArray) {
-        writeCharacteristic?.let {
-            controller.device!!.writeCharacteristic(
-                it, data,
-                WriteType.WITH_RESPONSE
+        if (controller.device != null) {
+            val writeCharacteristic = controller.device!!.getCharacteristic(
+                BLEControllerManager.SERVICE_UUID,
+                BLEControllerManager.TO_ESP32_UUID
             )
+            writeCharacteristic?.let {
+                controller.device!!.writeCharacteristic(
+                    it, data,
+                    WriteType.WITH_RESPONSE
+                )
+                return // success
+            }
         }
-        if (writeCharacteristic == null)
-            controller.reconnect()
-        else
-            controller.checkConnection()
+        controller.checkConnection()
     }
 
     @ExperimentalUnsignedTypes

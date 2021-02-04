@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 const val DEFAULT_NAME: String = "LEDs"
 
-class ESP32(private val act: MainActivity, val addr: String, var name: String)
+class ESP32(val act: MainActivity, val addr: String, var name: String)
     : BluetoothPeripheralCallback(), PinDriver
 {
     var dbId = -1 // -1 means none yet
@@ -35,7 +35,7 @@ class ESP32(private val act: MainActivity, val addr: String, var name: String)
     // Other stuff
     private val pwmDriversByAddress: TreeMap<Int, PinDriver> = TreeMap()
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
-    val ledStrips: TreeMap<String, LEDStrip> = TreeMap()
+    val ledStrips: TreeMap<String, LEDStrip> = TreeMap() // uuid to LED Strip
     val ledStripGroups: TreeMap<String, LEDStripGroup> = TreeMap()
     val colorsSequences: TreeMap<String, ColorSequence> = TreeMap()
     val queuedPackets: SparseArray<SendablePacket> = SparseArray()
@@ -136,7 +136,7 @@ class ESP32(private val act: MainActivity, val addr: String, var name: String)
     /**
      * Stores the LED strip, then sends the LED strip to the controller.
      */
-    fun addLEDStrip(strip: LEDStrip, sendPacket: Boolean) {
+    fun addLEDStrip(strip: LEDStrip, sendPacket: Boolean, save: Boolean) {
         if (ledStrips.containsKey(strip.id)) {
             // Maybe throw error in the future
             Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
@@ -145,9 +145,11 @@ class ESP32(private val act: MainActivity, val addr: String, var name: String)
 
         Log.println(Log.INFO, "ESP32", "About to notify")
 
+        if (save)
+            strip.saveToDBFull()
+
         GlobalScope.launch {
             withContext(Dispatchers.Main) {
-                Log.println(Log.INFO, "ESP32", "Notified")
                 if (SharedData.ledStripsFragment == null)
                     Log.println(Log.INFO, "ESP32", "Could not notify. Fragment null.")
                 SharedData.ledStripsFragment?.adapter?.notifyDataSetChanged()
@@ -161,11 +163,13 @@ class ESP32(private val act: MainActivity, val addr: String, var name: String)
      /**
      * Stores the LED strip, then sends the LED strip to the controller.
      */
-    fun addLEDStripGroup(group: LEDStripGroup, sendPacket: Boolean) {
+    fun addLEDStripGroup(group: LEDStripGroup, sendPacket: Boolean, save: Boolean) {
         if (ledStrips.containsKey(group.id)) {
             // Maybe throw error in the future
             Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
         }
+        if (save)
+            group.saveToDBFull()
         ledStripGroups[group.id] = group
          GlobalScope.launch {
              withContext(Dispatchers.Main) {

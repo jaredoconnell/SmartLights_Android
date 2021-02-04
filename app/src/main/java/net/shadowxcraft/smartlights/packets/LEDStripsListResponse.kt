@@ -13,7 +13,7 @@ class LEDStripsListResponse(controller: ESP32, bytes: ByteArray)
         val offsetOfPacket = getShort()
         val numLEDStripsSentInPacket = getByte()
         for (colorStripIndex in 0 until numLEDStripsSentInPacket) {
-            controller.addLEDStrip(bytesToLEDStrip(), false)
+            controller.addLEDStrip(bytesToLEDStrip(), sendPacket=false, save=true)
         }
         Log.i("LEDStripsListResponse", "Num LED Strips: $numLedStrips, offsetOfPacket:"
             +" $offsetOfPacket, num LED Strips in packet: $numLEDStripsSentInPacket")

@@ -83,8 +83,8 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
     }
 
     override fun onColorSelected(color: Color) {
-        dialog!!.ledStrip!!.simpleColor = color
-        dialog!!.ledStrip!!.currentSeq = null
+        dialog!!.ledStrip!!.setSimpleColor(color, true)
+        dialog!!.ledStrip!!.setCurrentSeq(null, true)
         // Clear the preview that likely built up.
         dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
         SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0).send()// indefinitely
@@ -130,7 +130,7 @@ class LEDStripListAdapter(
             nameView.text = ledStripGroup.name
             //offOnStateToggle.isChecked = ledStripGroup.onState
             offOnStateToggle.setOnClickListener {
-                ledStripGroup.onState = false
+                ledStripGroup.setOnState(onState=false, save=true)
                 ledStripGroup.sendBrightnessPacket()
             }
             brightnessBar.max = MAX_BRIGHTNESS
@@ -140,8 +140,8 @@ class LEDStripListAdapter(
                 override fun onProgressChanged(seek: SeekBar,
                                                progress: Int, fromUser: Boolean)
                 {
-                    ledStripGroup.setBrightnessExponential(progress)
-                    ledStripGroup.onState = true // so groups don't conflict.
+                    ledStripGroup.setBrightnessExponential(progress, true)
+                    ledStripGroup.setOnState(onState=true, save=true) // so groups don't conflict.
                     ledStripGroup.sendBrightnessPacket()
                 }
 

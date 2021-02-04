@@ -85,7 +85,7 @@ class ColorsFragment(private val strip: LEDStrip? = null,
                 // Already selected, so exit.
                 activity?.supportFragmentManager?.popBackStack()
             } else {
-                strip.currentSeq = selected
+                strip.setCurrentSeq(selected, true)
                 SetColorSequenceForLEDStripPacket(correctStrip).send()
             }
         } else {

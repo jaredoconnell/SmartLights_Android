@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,7 +26,7 @@ import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
  * Use the [ScheduledChangeEditorFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ColorSequenceEditorFragment(private val act: Activity, private val colorSequence: ColorSequence,
+class ColorSequenceEditorFragment(private val act: FragmentActivity, private val colorSequence: ColorSequence,
                                   private val controller: ESP32, private val ledstrip: LEDStrip?,
                                   private val scheduledChange: ScheduledChange? = null)
     : Fragment(), ButtonClickListener, ColorEditorDialog.ColorSelectedListener,
@@ -87,7 +88,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                 colorSequence.colors.isEmpty() -> {
                     tabLayout.getTabAt(0)?.select()
                     Toast.makeText(
-                        BLEControllerManager.activity,
+                        act,
                         "Please add at least one color.",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -95,7 +96,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                 name.isEmpty() -> {
                     tabLayout.getTabAt(1)?.select()
                     Toast.makeText(
-                        BLEControllerManager.activity,
+                        act,
                         "Please give the color sequence a name.",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -114,7 +115,7 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                     if ((colorSequence.sustainTime + colorSequence.transitionTime <= 0)
                         && colorSequence.colors.size > 1) {
                         Toast.makeText(
-                            BLEControllerManager.activity,
+                            act,
                             "Please add a transition or sustain time greater than 0.",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -123,13 +124,13 @@ class ColorSequenceEditorFragment(private val act: Activity, private val colorSe
                         controller.addColorSequence(colorSequence, true)
 
                         if (ledstrip != null && scheduledChange == null) {
-                            ledstrip.currentSeq = colorSequence
+                            ledstrip.setCurrentSeq(colorSequence, true)
                             SetColorSequenceForLEDStripPacket(ledstrip).send()
                         } else if (scheduledChange != null) {
                             scheduledChange.newColorSequenceID = colorSequence.id
                         }
 
-                        (context as MainActivity).supportFragmentManager.popBackStack()
+                        act.supportFragmentManager.popBackStack()
                     }
                 }
             }

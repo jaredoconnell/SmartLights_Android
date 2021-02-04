@@ -1,14 +1,16 @@
 package net.shadowxcraft.smartlights
 
 object ControllerManager {
-    val controllerMap = HashMap<String, ESP32>() // map addr to controller
+    val controllerAddrMap = HashMap<String, ESP32>() // map addr to controller
+    val controllerIDMap = HashMap<Int, ESP32>() // map addr to controller
     val controllers = ArrayList<ESP32>()
 
     fun addController(controller: ESP32) {
-        if (controllerMap.containsKey(controller.addr))
+        if (controllerAddrMap.containsKey(controller.addr))
             throw IllegalStateException("Added controller that already exists")
         controllers.add(controller)
-        controllerMap[controller.addr] = controller
+        controllerAddrMap[controller.addr] = controller
+        controllerIDMap[controller.dbId] = controller
     }
 
     fun connectAll() {

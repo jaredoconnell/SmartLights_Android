@@ -22,7 +22,7 @@
                 android:text="Name"
                 android:layout_weight="1"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/on_off_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -64,13 +64,14 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
             null
         }
 
-        val newLEDStrip = LEDStrip(id, name, currentSequence, controller)
+        val newLEDStrip = LEDStrip(id, name, controller)
         newLEDStrip.components.addAll(components)
 
-        newLEDStrip.onState = isOn
-        newLEDStrip.brightness = brightness
+        newLEDStrip.setCurrentSeq(currentSequence, false)
+        newLEDStrip.setOnState(isOn, false)
+        newLEDStrip.setBrightness(brightness, false)
         if (hasTemporaryColor && secondsLeftTempColor == 0)
-            newLEDStrip.simpleColor = tempColor
+            newLEDStrip.setSimpleColor(tempColor, false)
 
         return newLEDStrip
     }

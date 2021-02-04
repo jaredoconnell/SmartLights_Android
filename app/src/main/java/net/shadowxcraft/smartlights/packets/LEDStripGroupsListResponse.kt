@@ -12,7 +12,7 @@ class LEDStripGroupsListResponse(controller: ESP32, bytes: ByteArray)
         val numGroupsTotal = getShort()
         val groupIndex = getShort()
         val ledStripGroup = bytesToLEDStripGroup()
-        controller.addLEDStripGroup(ledStripGroup, false)
+        controller.addLEDStripGroup(ledStripGroup, false, true)
         Log.i("LEDStripGroupsListResp", "Num Groups: $numGroupsTotal, index:"
             + " $groupIndex")
     }

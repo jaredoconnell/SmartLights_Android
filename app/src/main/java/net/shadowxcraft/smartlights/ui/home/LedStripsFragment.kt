@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -78,7 +79,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
                 Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
             }
             R.id.set_color_button -> {
-                dialog = ColorEditorDialog(BLEControllerManager.activity!!, ledStrip!!.simpleColor, ledStrip!!)
+                dialog = ColorEditorDialog(BLEControllerManager.activity!!, ledStrip!!.simpleColor, ledStrip)
                 dialog!!.listener = this
                 dialog!!.display()
             }
@@ -89,8 +90,8 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
     }
 
     override fun onColorSelected(color: Color) {
-        dialog!!.ledStrip!!.simpleColor = color
-        dialog!!.ledStrip!!.currentSeq = null
+        dialog!!.ledStrip!!.setSimpleColor(color, true)
+        dialog!!.ledStrip!!.setCurrentSeq(null, true)
         // Clear the preview that likely built up.
         dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
         SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0).send()// indefinitely
@@ -127,7 +128,7 @@ class LEDStripListAdapter(
         private val colorsButtonView: ImageView = itemView.findViewById(R.id.set_colors_button)
         private val colorButtonView: ImageView = itemView.findViewById(R.id.set_color_button)
         private val editSchedulesView: ImageView = itemView.findViewById(R.id.edit_schedules_button)
-        private val offOnStateToggle: Switch = itemView.findViewById(R.id.on_off_switch)
+        private val offOnStateToggle: SwitchCompat = itemView.findViewById(R.id.on_off_switch)
         val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
         private var ledStrip: LEDStrip? = null
 
@@ -137,14 +138,18 @@ class LEDStripListAdapter(
             nameView.text = ledStrip.name
             offOnStateToggle.isChecked = ledStrip.onState
             offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
-                ledStrip.onState = isChecked
-                ledStrip.sendBrightnessPacket()
-                if (isChecked && ledStrip.brightness < 300
-                    && (activity as MainActivity).getLuxVal() > 100)
-                {
-                    Toast.makeText(activity,
-                        "The LED is dim.",
-                        Toast.LENGTH_SHORT).show()
+                if (offOnStateToggle.isPressed) {
+                    ledStrip.setOnState(isChecked, true)
+                    ledStrip.sendBrightnessPacket()
+                    if (isChecked && ledStrip.brightness < 300
+                        && (activity as MainActivity).getLuxVal() > 100
+                    ) {
+                        Toast.makeText(
+                            activity,
+                            "The LED is dim.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
             brightnessBar.max = MAX_BRIGHTNESS
@@ -154,12 +159,14 @@ class LEDStripListAdapter(
                 override fun onProgressChanged(seek: SeekBar,
                                                progress: Int, fromUser: Boolean)
                 {
-                    ledStrip.setBrightnessExponential(progress)
-                    if (ledStrip.brightness == 0) {
-                        // It's low enough that it rounds down to 0
-                        brightnessBar.progress = 0
+                    if (brightnessBar.isPressed) {
+                        ledStrip.setBrightnessExponential(progress, true)
+                        if (ledStrip.brightness == 0) {
+                            // It's low enough that it rounds down to 0
+                            brightnessBar.progress = 0
+                        }
+                        ledStrip.sendBrightnessPacket()
                     }
-                    ledStrip.sendBrightnessPacket()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {

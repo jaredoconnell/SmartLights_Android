@@ -38,7 +38,6 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
     val ledStrips: TreeMap<String, LEDStrip> = TreeMap() // uuid to LED Strip
     val ledStripGroups: TreeMap<String, LEDStripGroup> = TreeMap()
-    val colorsSequences: TreeMap<String, ColorSequence> = TreeMap()
     val queuedPackets: SparseArray<SendablePacket> = SparseArray()
     private var pins: TreeMap<String, Int> = TreeMap()
 
@@ -195,11 +194,13 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
 
     fun addColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
         //if (!colorsSequences.contains(colorSequence.id)) {
-        colorsSequences[colorSequence.id] = colorSequence
+        SharedData.colorsSequences[colorSequence.id] = colorSequence
         //}
 
         if (sendPacket)
             AddColorSequencePacket(this, colorSequence).send()
+        // save
+        colorSequence.saveToDB(act)
     }
 
     private fun checkName(listener: BLEControllerManager.BluetoothConnectionListener?) {

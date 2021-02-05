@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper
 class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL(SQLTableData.SQL_CREATE_COLOR_SEQUENCE_TABLE)
+        db.execSQL(SQLTableData.SQL_CREATE_COLOR_SEQUENCE_COLORS_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_CONTROLLER_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_PWM_DRIVER_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_TABLE)

@@ -228,7 +228,7 @@ class ScheduledChangeEditorFragment(private val scheduledChange: ScheduledChange
 
     private fun updateColorSequenceDisplay() {
         if (scheduledChange.newColorSequenceID != null) {
-            val colorSequence = scheduledChange.ledStrip!!.controller.colorsSequences[scheduledChange.newColorSequenceID!!]
+            val colorSequence = SharedData.colorsSequences[scheduledChange.newColorSequenceID!!]
 
             val colorSequencePreview: ImageView =
                 currentView.findViewById(R.id.item_color_sequence_preview)

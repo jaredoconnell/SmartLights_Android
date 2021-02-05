@@ -59,7 +59,7 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         }
         val name = bytesToStr()
         val currentSequence : ColorSequence? = if (currentSequenceID != "") {
-            controller.colorsSequences[currentSequenceID]
+            SharedData.colorsSequences[currentSequenceID]
         } else {
             null
         }

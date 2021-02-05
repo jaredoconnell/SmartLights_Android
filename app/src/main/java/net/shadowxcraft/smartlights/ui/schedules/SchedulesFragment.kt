@@ -144,7 +144,7 @@ class SchedulesListListAdapter(val strip: LEDStrip?, val clickListener: ClickLis
             description += "Color change to:\n" + scheduledChange.newColor.toString()
         else if (scheduledChange.newColorSequenceID != null)
             description += "Color Sequence change to " +
-                    (strip.controller.colorsSequences[scheduledChange.newColorSequenceID!!]?.name)
+                    (SharedData.colorsSequences[scheduledChange.newColorSequenceID!!]?.name)
 
         if (!scheduledChange.turnOn && scheduledChange.newColorSequenceID == null &&
             scheduledChange.newColor == null)

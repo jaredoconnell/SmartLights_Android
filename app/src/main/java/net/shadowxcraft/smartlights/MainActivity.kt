@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 val dbHelper = DBHelper(this@MainActivity)
                 // in thread pool
                 val db = dbHelper.readableDatabase
+                loadColorSequences(db)
+                loadColorSequenceColors(db)
                 loadControllers(db)
                 loadPWMDrivers(db)
                 loadLEDStrips(db)
@@ -86,6 +88,78 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 Log.e( "MainActivity", "Exception in loadFromDB", any)
             }
         }
+    }
+
+    private fun loadColorSequences(db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            "uuid",
+            SQLTableData.ColorSequenceEntry.COLUMN_NAME_NAME,
+            SQLTableData.ColorSequenceEntry.COLUMN_NAME_SEQUENCE_TYPE,
+            SQLTableData.ColorSequenceEntry.COLUMN_NAME_SUSTAIN_TIME,
+            SQLTableData.ColorSequenceEntry.COLUMN_NAME_TRANSITION_TIME,
+            SQLTableData.ColorSequenceEntry.COLUMN_NAME_TRANSITION_TYPE)
+        val cursor = db.query(
+            SQLTableData.ColorSequenceEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            val uuid = cursor.getString(0)
+            val name = cursor.getString(1)
+            val sequenceType = cursor.getInt(2)
+            val sequenceSustainTime = cursor.getInt(3)
+            val sequenceTransitionTime = cursor.getInt(4)
+            val sequenceTransitionType = cursor.getInt(5)
+
+            if (!SharedData.colorsSequences.containsKey(uuid)) {
+                val sequence = ColorSequence(uuid, name)
+                sequence.sequenceType = sequenceType.toByte()
+                sequence.sustainTime = sequenceSustainTime
+                sequence.transitionTime = sequenceTransitionTime
+                sequence.transitionType = sequenceTransitionType.toByte()
+                SharedData.colorsSequences[uuid] = sequence
+            }
+        }
+        cursor.close()
+    }
+
+    private fun loadColorSequenceColors(db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            SQLTableData.ColorSequenceColorEntry.COLUMN_NAME_SEQUENCE_ID,
+            SQLTableData.ColorSequenceColorEntry.COLUMN_NAME_ORDER_INDEX,
+            SQLTableData.ColorSequenceColorEntry.COLUMN_NAME_COLOR_ARGB)
+        val cursor = db.query(
+            SQLTableData.ColorSequenceColorEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            "`${SQLTableData.ColorSequenceColorEntry.COLUMN_NAME_ORDER_INDEX}` ASC"
+        )
+        while (cursor.moveToNext()) {
+            val sequenceID = cursor.getString(0)
+            val orderIndex = cursor.getInt(1)
+            val color = Color(cursor.getInt(2))
+
+            val sequence = SharedData.colorsSequences[sequenceID]
+            if (sequence == null) {
+                Log.println(Log.WARN, "MainActivity", "Could not find sequence ID while" +
+                        " loading colors")
+                continue
+            }
+            if (sequence.colors.size == orderIndex) { // depends on the ascending order.
+                sequence.colors.add(color)
+            } else {
+                Log.println(Log.WARN, "MainActivity", "Order mismatch while" +
+                        " loading color (index: $orderIndex, size: ${sequence.colors.size})")
+            }
+        }
+        cursor.close()
     }
 
     private fun loadControllers(db: SQLiteDatabase) {
@@ -190,7 +264,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 val currSeq = if (curSeqID == null) {
                     null
                 } else {
-                    controller.colorsSequences[curSeqID]
+                    SharedData.colorsSequences[curSeqID]
                 }
 
                 val newStrip = LEDStrip( uuid, name, controller)
@@ -274,7 +348,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 val currSeq = if (curSeqID == null) {
                     null
                 } else {
-                    controller.colorsSequences[curSeqID]
+                    SharedData.colorsSequences[curSeqID]
                 }
 
                 val ledStrips = getLEDStripsForGroup(controller, uuid, db)

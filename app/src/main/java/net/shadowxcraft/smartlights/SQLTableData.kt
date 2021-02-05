@@ -131,4 +131,34 @@ object SQLTableData {
         const val COLUMN_NAME_NEW_RGB = "new_rgba_color"
         const val COLUMN_NAME_NEW_COLOR_SEQUENCE_ID = "new_sequence"
     }
+
+    const val SQL_CREATE_COLOR_SEQUENCE_TABLE = "CREATE TABLE `${ColorSequenceEntry.TABLE_NAME}` (" +
+            "`uuid` TEXT PRIMARY KEY," +
+            "`${ColorSequenceEntry.COLUMN_NAME_NAME}` TEXT NOT NULL," +
+            "`${ColorSequenceEntry.COLUMN_NAME_SEQUENCE_TYPE}` INTEGER NOT NULL," +
+            "`${ColorSequenceEntry.COLUMN_NAME_SUSTAIN_TIME}` INTEGER NOT NULL," +
+            "`${ColorSequenceEntry.COLUMN_NAME_TRANSITION_TIME}` INTEGER NOT NULL," +
+            "`${ColorSequenceEntry.COLUMN_NAME_TRANSITION_TYPE}` INTEGER NOT NULL)"
+
+    object ColorSequenceEntry {
+        const val TABLE_NAME = "color_sequences"
+        const val COLUMN_NAME_NAME = "name"
+        const val COLUMN_NAME_SEQUENCE_TYPE = "type"
+        const val COLUMN_NAME_SUSTAIN_TIME = "sustain_time"
+        const val COLUMN_NAME_TRANSITION_TIME = "transition_time"
+        const val COLUMN_NAME_TRANSITION_TYPE = "transition_type"
+    }
+
+    const val SQL_CREATE_COLOR_SEQUENCE_COLORS_TABLE = "CREATE TABLE" +
+            "`${ColorSequenceColorEntry.TABLE_NAME}` (" +
+            "`${ColorSequenceColorEntry.COLUMN_NAME_SEQUENCE_ID}` TEXT NOT NULL," +
+            "`${ColorSequenceColorEntry.COLUMN_NAME_ORDER_INDEX}` INTEGER NOT NULL," +
+            "`${ColorSequenceColorEntry.COLUMN_NAME_COLOR_ARGB}` INTEGER NOT NULL)"
+
+    object ColorSequenceColorEntry {
+        const val TABLE_NAME = "color_sequence_colors"
+        const val COLUMN_NAME_SEQUENCE_ID = "sequence_id"
+        const val COLUMN_NAME_ORDER_INDEX = "order_index"
+        const val COLUMN_NAME_COLOR_ARGB = "color_argb"
+    }
 }

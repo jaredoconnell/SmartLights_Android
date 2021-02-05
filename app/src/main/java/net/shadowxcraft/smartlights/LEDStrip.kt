@@ -125,6 +125,16 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
 
                 database.insertWithOnConflict(SQLTableData.LEDStripEntry.TABLE_NAME,
                     null, values, SQLiteDatabase.CONFLICT_REPLACE)
+
+                for (component in components) {
+                    val componentValues = ContentValues()
+                    componentValues.put(SQLTableData.LEDStripComponentEntry.COLUMN_NAME_LED_STRIP_ID, id)
+                    componentValues.put(SQLTableData.LEDStripComponentEntry.COLUMN_NAME_RGB, component.color.toArgb())
+                    componentValues.put(SQLTableData.LEDStripComponentEntry.COLUMN_NAME_DRIVER_ID, component.driver.getAddress())
+                    componentValues.put(SQLTableData.LEDStripComponentEntry.COLUMN_NAME_DRIVER_PIN, component.driverPin)
+                    database.insertWithOnConflict(SQLTableData.LEDStripComponentEntry.TABLE_NAME,
+                        null, componentValues, SQLiteDatabase.CONFLICT_REPLACE)
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(SQLTableData.SQL_CREATE_CONTROLLER_TABLE)
+        db.execSQL(SQLTableData.SQL_CREATE_PWM_DRIVER_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_COMPONENT_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_GROUP_TABLE)

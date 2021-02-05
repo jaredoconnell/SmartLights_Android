@@ -55,20 +55,6 @@ class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<L
                     values,"uuid in (${getWhereClauseUnknowns()})", getIDs()
                 )
                 Log.println(Log.INFO, "LEDStripGroup", "Rows affected: $numRows")
-                // Save the group
-                /*database.update(SQLTableData.LEDStripEntry.TABLE_NAME,
-                    values,"uuid=?", arrayOf(id))
-                val cursor = database.rawQuery("SELECT * from led_strips WHERE uuid in ('3462fc95-a43e-412f-94c2-178fcc79262d','383b6bcb-4519-46c8-975d-0fd29a9efe72','3af3be62-91d0-4f7b-b508-b7bafd11a5e8','6816f7d1-4630-487f-9aa0-117e585cbe3c','71efbbe9-0b77-406e-bbb0-95b75e0ff62f','f4a056b0-7a58-47bc-9848-ced3b13bfe31')", emptyArray())
-                    /*SQLTableData.LEDStripEntry.TABLE_NAME,
-                    null,
-                    "uuid in (${getIDs().joinToString(separator = ",")})",
-                    null,
-                    null,
-                    null,
-                    null
-                )*/
-                Log.println(Log.INFO, "LEDStripGroup", "Num rows: ${cursor.count}")
-                cursor.close()*/
             }
         }
     }

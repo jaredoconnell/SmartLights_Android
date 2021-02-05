@@ -77,15 +77,10 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 val dbHelper = DBHelper(this@MainActivity)
                 // in thread pool
                 val db = dbHelper.readableDatabase
-                loadDevices(db)
+                loadControllers(db)
+                loadPWMDrivers(db)
                 loadLEDStrips(db)
                 loadLEDStripGroups(db)
-                //val cursor = db.query(SQLTableData.ControllerEntry.TABLE_NAME,
-                //    null, null, null, null, null, null)
-
-                //Log.println(Log.INFO, "MainActivity", "There are " + cursor.count + " columns")
-
-                //cursor.close()
                 SharedData.loaded = true
             } catch (any: Exception) {
                 Log.e( "MainActivity", "Exception in loadFromDB", any)
@@ -93,7 +88,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         }
     }
 
-    private fun loadDevices(db: SQLiteDatabase) {
+    private fun loadControllers(db: SQLiteDatabase) {
         val selectedCols = arrayOf(
             "id",
             SQLTableData.ControllerEntry.COLUMN_NAME_BLE_ADDR,
@@ -117,6 +112,41 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 newController.dbId = id
                 ControllerManager.addController(newController)
             }
+        }
+        cursor.close()
+    }
+
+    private fun loadPWMDrivers(db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            SQLTableData.PWMDriverEntry.COLUMN_NAME_CONTROLLER_ID,
+            SQLTableData.PWMDriverEntry.COLUMN_NAME_ADDRESS)
+        val cursor = db.query(
+            SQLTableData.PWMDriverEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            val controllerID = cursor.getInt(0)
+            val addr = cursor.getInt(1)
+
+            if (addr < 64) {
+                Log.println(Log.WARN, "MainActivity", "Database has a driver with address" +
+                        " less than 64, which is invalid.")
+                continue
+            }
+
+            val controller = ControllerManager.controllerIDMap[controllerID]
+            if (controller == null) {
+                Log.println(Log.WARN, "MainActivity", "Could not find controller with" +
+                        " ID $controllerID.")
+                continue
+            }
+            val pwmDriver = PWMDriver(addr)
+            controller.addPWMDriver(pwmDriver, false)
         }
         cursor.close()
     }
@@ -168,11 +198,42 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 newStrip.setOnState(onState == 1, false)
                 newStrip.setBrightness(brightness, false)
                 newStrip.setSimpleColor(Color(colorArgb), false)
+                loadLEDStripComponents(newStrip, db)
                 controller.addLEDStrip(newStrip, sendPacket=false, save=false)
             }
         }
         cursor.close()
     }
+
+    private fun loadLEDStripComponents(strip: LEDStrip, db: SQLiteDatabase) {
+        val selectedCols = arrayOf(
+            SQLTableData.LEDStripComponentEntry.COLUMN_NAME_RGB,
+            SQLTableData.LEDStripComponentEntry.COLUMN_NAME_DRIVER_ID,
+            SQLTableData.LEDStripComponentEntry.COLUMN_NAME_DRIVER_PIN,
+        )
+        val cursor = db.query(
+            SQLTableData.LEDStripComponentEntry.TABLE_NAME,
+            selectedCols,
+            "${SQLTableData.LEDStripComponentEntry.COLUMN_NAME_LED_STRIP_ID}=?",
+            arrayOf(strip.id),
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            val color = Color(cursor.getInt(0))
+            val driverID = cursor.getInt(1)
+            val driverPin = cursor.getInt(2)
+            val driver = strip.controller.getPWMDriverByAddress(driverID)
+            if (driver != null)
+                strip.components.add(LEDStripComponent(color, driver, driverPin))
+            else
+                Log.println(Log.WARN, "MainActivity", "Could not add LED Strip" +
+                        " component due to missing driver by address.")
+        }
+        cursor.close()
+    }
+
     private fun loadLEDStripGroups(db: SQLiteDatabase) {
         val selectedCols = arrayOf(
             "uuid",

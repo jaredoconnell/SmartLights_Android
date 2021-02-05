@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import android.util.SparseArray
 import android.widget.EditText
@@ -98,6 +99,20 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
 
         if (sendPacket)
             AddPWMDriverPacket(this, pwmDriver).send()
+
+        // Save
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                val database = DBHelper(act).writableDatabase
+                val values = ContentValues()
+                values.put(SQLTableData.PWMDriverEntry.COLUMN_NAME_CONTROLLER_ID, dbId)
+                values.put(SQLTableData.PWMDriverEntry.COLUMN_NAME_ADDRESS, pwmDriver.getAddress())
+                database.insertWithOnConflict(
+                    SQLTableData.PWMDriverEntry.TABLE_NAME,
+                    null, values, SQLiteDatabase.CONFLICT_IGNORE
+                )
+            }
+        }
     }
 
     fun getPWMDriverByName(name: String) : PinDriver? {

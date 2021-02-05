@@ -15,6 +15,18 @@ object SQLTableData {
         const val COLUMN_NAME_BLE_ADDR = "ble_address"
     }
 
+    const val SQL_CREATE_PWM_DRIVER_TABLE = "CREATE TABLE `${PWMDriverEntry.TABLE_NAME}` (" +
+            "`${PWMDriverEntry.COLUMN_NAME_CONTROLLER_ID}` INTEGER NOT NULL," +
+            "`${PWMDriverEntry.COLUMN_NAME_ADDRESS}` INTEGER NOT NULL," +
+            "PRIMARY KEY(${PWMDriverEntry.COLUMN_NAME_CONTROLLER_ID}," +
+            "${PWMDriverEntry.COLUMN_NAME_ADDRESS}))"
+
+    object PWMDriverEntry {
+        const val TABLE_NAME = "pwm_drivers"
+        const val COLUMN_NAME_CONTROLLER_ID = "controller_id"
+        const val COLUMN_NAME_ADDRESS = "address"
+    }
+
     const val SQL_CREATE_LEDSTRIP_TABLE = "CREATE TABLE `${LEDStripEntry.TABLE_NAME}` (" +
             "`uuid` TEXT PRIMARY KEY NOT NULL," +
             "`${LEDStripEntry.COLUMN_NAME_NAME}` TEXT NOT NULL," +
@@ -39,7 +51,10 @@ object SQLTableData {
             "`${LEDStripComponentEntry.COLUMN_NAME_LED_STRIP_ID}` TEXT NOT NULL," +
             "`${LEDStripComponentEntry.COLUMN_NAME_RGB}` INTEGER NOT NULL," +
             "`${LEDStripComponentEntry.COLUMN_NAME_DRIVER_ID}` INTEGER NOT NULL," +
-            "`${LEDStripComponentEntry.COLUMN_NAME_DRIVER_PIN}` INTEGER NOT NULL)"
+            "`${LEDStripComponentEntry.COLUMN_NAME_DRIVER_PIN}` INTEGER NOT NULL," +
+            "PRIMARY KEY(${LEDStripComponentEntry.COLUMN_NAME_LED_STRIP_ID}," +
+            "${LEDStripComponentEntry.COLUMN_NAME_DRIVER_ID}," +
+            "${LEDStripComponentEntry.COLUMN_NAME_DRIVER_PIN}))"
 
 
     object LEDStripComponentEntry {

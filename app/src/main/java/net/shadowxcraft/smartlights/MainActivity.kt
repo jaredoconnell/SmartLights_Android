@@ -353,11 +353,8 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
 
                 val ledStrips = getLEDStripsForGroup(controller, uuid, db)
 
-                val newStrip = LEDStripGroup( uuid, name, ledStrips, controller)
-                newStrip.setCurrentSeq(currSeq, false)
-                newStrip.setOnState(onState == 1, false)
-                newStrip.setBrightness(brightness, false)
-                newStrip.setSimpleColor(Color(colorArgb), false)
+                val newStrip = LEDStripGroup( uuid, name, ledStrips, controller, brightness,
+                    onState == 1, Color(colorArgb), currSeq)
                 controller.addLEDStripGroup(newStrip, sendPacket=false, save=false)
             }
         }
@@ -433,7 +430,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
 
         Handler().postDelayed({
             //ControllerManager.connectAll()
-        }, 2000)
+        }, 1500)
     }
 
     override fun onResume() {
@@ -444,10 +441,30 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
 
     override fun onPause() {
         // Be sure to unregister the sensor when the activity pauses.
+        saveAllLEDStripChanges()
         super.onPause()
         sensorManager.unregisterListener(this)
     }
 
+    override fun onDestroy() {
+        saveAllLEDStripChanges()
+        super.onDestroy()
+    }
+
+    private fun saveAllLEDStripChanges() {
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                for (controller in ControllerManager.controllers) {
+                    for (ledStrip in controller.ledStrips.values) {
+                        ledStrip.saveChangesSync()
+                    }
+                    for (ledStripGroup in controller.ledStripGroups.values) {
+                        ledStripGroup.saveChangesSync()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event != null) {

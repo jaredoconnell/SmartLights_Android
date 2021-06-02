@@ -20,14 +20,14 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
 {
     val components = ArrayList<LEDStripComponent>()
 
+    val componentsToSave = ContentValues()
+
     open var currentSeq: ColorSequence? = null
         protected set
     fun setCurrentSeq(seq: ColorSequence?, save: Boolean) {
         this.currentSeq = seq
         if (save) {
-            val values = ContentValues()
-            values.put(SQLTableData.LEDStripEntry.COLUMN_NAME_CUR_SEQ, seq?.id)
-            savePropertiesToDB(values)
+            componentsToSave.put(SQLTableData.LEDStripEntry.COLUMN_NAME_CUR_SEQ, seq?.id)
         }
     }
 
@@ -38,9 +38,7 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
         brightness = newBrightness
 
         if (save) {
-            val values = ContentValues()
-            values.put(SQLTableData.LEDStripEntry.COLUMN_NAME_BRIGHTNESS, brightness)
-            savePropertiesToDB(values)
+            componentsToSave.put(SQLTableData.LEDStripEntry.COLUMN_NAME_BRIGHTNESS, brightness)
         }
     }
 
@@ -54,9 +52,7 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
             } else {
                 0
             }
-            val values = ContentValues()
-            values.put(SQLTableData.LEDStripEntry.COLUMN_NAME_ON_STATE, value)
-            savePropertiesToDB(values)
+            componentsToSave.put(SQLTableData.LEDStripEntry.COLUMN_NAME_ON_STATE, value)
         }
     }
     open var simpleColor = Color(255, 0, 0)
@@ -65,22 +61,17 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
         this.simpleColor = color
 
         if (save) {
-            val values = ContentValues()
-            values.put(SQLTableData.LEDStripEntry.COLUMN_NAME_RGB, color.toArgb())
-            savePropertiesToDB(values)
+            componentsToSave.put(SQLTableData.LEDStripEntry.COLUMN_NAME_RGB, color.toArgb())
         }
     }
 
     val scheduledChanges = TreeMap<String, ScheduledChange>()
 
-    protected open fun savePropertiesToDB(values: ContentValues) {
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                val database = DBHelper(controller.act).writableDatabase
-                database.update(SQLTableData.LEDStripEntry.TABLE_NAME,
-                    values,"uuid=?", arrayOf(id))
-            }
-        }
+    protected open fun savePropertiesToDBSync(values: ContentValues) {
+        val database = DBHelper(controller.act).writableDatabase
+        database.update(SQLTableData.LEDStripEntry.TABLE_NAME,
+            values,"uuid=?", arrayOf(id))
+        values.clear()
     }
 
     fun convertToLinear(exponentialInput: Int): Int {
@@ -103,6 +94,12 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
     open fun setBrightnessExponential(exponentialInput: Int, save: Boolean) {
         setBrightness(convertToLinear(exponentialInput), save)
         Log.println(Log.INFO,"LEDStrip", "Set brightness to $brightness")
+    }
+
+    fun saveChangesSync() {
+        if (componentsToSave.size() != 0) {
+            savePropertiesToDBSync(componentsToSave)
+        }
     }
 
     open fun saveToDBFull() {

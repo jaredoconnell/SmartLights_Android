@@ -8,9 +8,18 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<LEDStrip>, controller: ESP32)
+class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<LEDStrip>,
+                    controller: ESP32, initialBrightness: Int = 4095, initialOnState: Boolean = true,
+                    initialColor: Color = Color(255, 0, 0),
+                    initialSequence: ColorSequence? = null)
     : LEDStrip(id, name, controller)
 {
+    init {
+        super.brightness = initialBrightness
+        super.onState = initialOnState
+        super.simpleColor = initialColor
+        super.currentSeq = initialSequence
+    }
 
     override var onState: Boolean
         get() = super.onState
@@ -45,7 +54,7 @@ class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<L
             }
         }
 
-    override fun savePropertiesToDB(values: ContentValues) {
+    override fun savePropertiesToDBSync(values: ContentValues) {
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
                 val database = DBHelper(controller.act).writableDatabase

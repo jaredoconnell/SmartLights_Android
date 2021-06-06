@@ -157,10 +157,11 @@ class LEDStripListAdapter(
             brightnessBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seek: SeekBar,
-                                               progress: Int, fromUser: Boolean)
+                                               newProgress: Int, fromUser: Boolean)
                 {
-                    if (brightnessBar.isPressed) {
-                        ledStrip.setBrightnessExponential(progress, true)
+                    val currentProgress = ledStrip.getBrightnessExponential()
+                    if (newProgress != currentProgress) {
+                        ledStrip.setBrightnessExponential(newProgress, true)
                         if (ledStrip.brightness == 0) {
                             // It's low enough that it rounds down to 0
                             brightnessBar.progress = 0

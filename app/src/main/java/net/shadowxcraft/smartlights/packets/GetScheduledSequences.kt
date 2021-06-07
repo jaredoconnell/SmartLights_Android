@@ -5,6 +5,6 @@ import net.shadowxcraft.smartlights.PWMDriver
 
 class GetScheduledSequences(controller: ESP32) : SendablePacket(controller, 13) {
     override fun send() {
-        sendData(byteArrayOf(13))
+        sendData(getHeader().toByteArray())
     }
 }

@@ -6,8 +6,7 @@ class SetSettingPacket(controller: ESP32, private val setting: ControllerSetting
     : SendablePacket(controller, 18)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(18) // packet ID 18
+        val output = getHeader()
 
         output.addAll(strToByteList(setting.settingName))
         if (setting.isString) {

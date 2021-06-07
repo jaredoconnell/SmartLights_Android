@@ -9,8 +9,7 @@ class AddColorSequencePacket(controller: ESP32, private val sequence: ColorSeque
     : SendablePacket(controller, 8)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(8) // packet ID 8
+        val output = getHeader()
         output.add(1) // It's okay to overwrite it
 
         output.addAll(strToByteList(sequence.id)) // First the ID

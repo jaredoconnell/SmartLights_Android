@@ -6,8 +6,7 @@ class SetBrightnessForLEDStrip(private val ledStrip: LEDStrip)
     : SendablePacket(ledStrip.controller, 16)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(16) // packet ID
+        val output = getHeader()
 
         output.addAll(strToByteList(ledStrip.id))
         output.add(if (ledStrip.onState) 1 else 0)

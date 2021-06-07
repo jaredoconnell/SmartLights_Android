@@ -8,8 +8,7 @@ class SetColorSequenceForLEDStripPacket(private val ledStrip: LEDStrip)
     : SendablePacket(ledStrip.controller, 9)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(9) // packet ID
+        val output = getHeader()
 
         val id = if (ledStrip.currentSeq == null) {
             ""

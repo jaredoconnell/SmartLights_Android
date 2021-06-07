@@ -7,6 +7,8 @@ class AddPWMDriverPacket(controller: ESP32, private val driver: PWMDriver)
     : SendablePacket(controller, 3)
 {
     override fun send() {
-        sendData(byteArrayOf(3, driver.i2cAddress.toByte()))
+        val output = getHeader()
+        output.add(driver.i2cAddress.toByte())
+        sendData(output.toByteArray())
     }
 }

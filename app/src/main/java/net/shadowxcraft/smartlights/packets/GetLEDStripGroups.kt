@@ -5,6 +5,6 @@ import net.shadowxcraft.smartlights.PWMDriver
 
 class GetLEDStripGroups(controller: ESP32) : SendablePacket(controller, 22) {
     override fun send() {
-        sendData(byteArrayOf(22))
+        sendData(getHeader().toByteArray())
     }
 }

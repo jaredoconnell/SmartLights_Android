@@ -11,8 +11,7 @@ class SetColorForLEDStripPacket(private val ledStrip: LEDStrip,
     : SendablePacket(ledStrip.controller, 19)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(19) // packet ID
+        val output = getHeader()
 
         output.addAll(strToByteList(ledStrip.id))
         output.addAll(colorToByteList(color))

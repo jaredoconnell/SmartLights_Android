@@ -6,8 +6,7 @@ class ScheduleChangePacket(private val scheduled: ScheduledChange)
     : SendablePacket(scheduled.ledStrip!!.controller, 10)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(packetID) // packet ID 8
+        val output = getHeader()
 
         output.addAll(strToByteList(scheduled.id)) // First the ID
         if (scheduled.name.length > 29)

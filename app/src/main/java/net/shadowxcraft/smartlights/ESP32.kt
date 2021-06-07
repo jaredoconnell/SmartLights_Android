@@ -39,6 +39,8 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     val ledStrips: TreeMap<String, LEDStrip> = TreeMap() // uuid to LED Strip
     val ledStripGroups: TreeMap<String, LEDStripGroup> = TreeMap()
     val queuedPackets: SparseArray<SendablePacket> = SparseArray()
+    val unreceivedPackets: SparseArray<SendablePacket> = SparseArray()
+    var nextPacketIndex: Int = 0
     private var pins: TreeMap<String, Int> = TreeMap()
 
     private val queuedPacketsTimer = Timer()
@@ -66,6 +68,15 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
                     val packet = queuedPackets.valueAt(0)
                     queuedPackets.removeAt(0)
                     packet.send()
+                }
+                if (unreceivedPackets.isNotEmpty() && device != null
+                    && device?.state == BluetoothPeripheral.STATE_CONNECTED)
+                {
+                    val packet = unreceivedPackets.valueAt(0)
+                    if (System.currentTimeMillis() - packet.sendTime > 2000) {
+                        // Resend after 2 seconds
+                        packet.send()
+                    }
                 }
             }
         }, 200, 100)
@@ -348,6 +359,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
             251 -> ColorSequenceListResponse(this, value)
             250 -> ScheduledChangeListResponse(this, value)
             245 -> LEDStripGroupsListResponse(this, value)
+            244 -> ReceivedPacketNotificationResponse(this, value)
             else -> throw IllegalStateException("Unknown packet ID ${value[0].toInt()}")
         }
     }

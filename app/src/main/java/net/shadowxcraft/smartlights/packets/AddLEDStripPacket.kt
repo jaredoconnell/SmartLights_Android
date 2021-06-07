@@ -9,8 +9,7 @@ class AddLEDStripPacket(controller: ESP32, private val strip: LEDStrip)
     : SendablePacket(controller, 5)
 {
     override fun send() {
-        val output = ArrayList<Byte>();
-        output.add(5) // packet ID 5
+        val output = getHeader()
         output.addAll(strToByteList(strip.id))
         output.add(strip.components.size.toByte())
 

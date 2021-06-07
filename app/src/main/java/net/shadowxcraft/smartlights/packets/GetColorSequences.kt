@@ -5,6 +5,6 @@ import net.shadowxcraft.smartlights.PWMDriver
 
 class GetColorSequences(controller: ESP32) : SendablePacket(controller, 12) {
     override fun send() {
-        sendData(byteArrayOf(12))
+        sendData(getHeader().toByteArray())
     }
 }

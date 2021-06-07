@@ -1,20 +1,34 @@
 package net.shadowxcraft.smartlights.packets
 
-import android.bluetooth.BluetoothGattCharacteristic
+import android.util.Log
+import androidx.core.util.set
 import com.welie.blessed.WriteType
 import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.Color
 import net.shadowxcraft.smartlights.ESP32
 
 abstract class SendablePacket(private val controller: ESP32, val packetID: Byte) {
+    val packetIndexID: Int = controller.nextPacketIndex++
+    var sendTime = 0L
+
     fun queue() {
         controller.queuePacket(this)
+    }
+
+    protected fun getHeader(): ArrayList<Byte> {
+        val output = ArrayList<Byte>();
+        output.add(packetID) // packet ID
+        output.addAll(intToByteList(packetIndexID.toUInt())) // index
+        return output
     }
 
     abstract fun send();
 
     protected fun sendData(data: ByteArray) {
         if (controller.device != null) {
+            Log.println(Log.INFO, "SendablePacket",
+                "Attempting to send packet with index $packetIndexID"
+            )
             val writeCharacteristic = controller.device!!.getCharacteristic(
                 BLEControllerManager.SERVICE_UUID,
                 BLEControllerManager.TO_ESP32_UUID
@@ -27,6 +41,8 @@ abstract class SendablePacket(private val controller: ESP32, val packetID: Byte)
                 return // success
             }
         }
+        this.sendTime = System.currentTimeMillis()
+        controller.unreceivedPackets[packetIndexID] = this
         controller.checkConnection()
     }
 

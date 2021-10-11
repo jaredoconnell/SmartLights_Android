@@ -22,7 +22,17 @@ class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<L
     }
 
     override var onState: Boolean
-        get() = super.onState
+        get() {
+            var isOn = false
+            for (strip in ledStrips) {
+                if (strip.onState) {
+                    isOn = true
+                    break
+                }
+            }
+            super.onState = isOn
+            return isOn
+        }
         set(on) {
             super.onState = on
             for (i in ledStrips) {
@@ -30,11 +40,18 @@ class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<L
             }
         }
     override var brightness: Int
-        get() = super.brightness
+        get() {
+            var maxBrightness = 0
+            for (strip in ledStrips) {
+                if (strip.brightness > maxBrightness)
+                    maxBrightness = strip.brightness
+            }
+            return maxBrightness
+        }
         set(brightness) {
             super.brightness = brightness
-            for (i in ledStrips) {
-                i.setBrightness(brightness, false)
+            for (strip in ledStrips) {
+                strip.setBrightness(brightness, false)
             }
         }
     override var simpleColor: Color

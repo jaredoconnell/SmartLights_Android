@@ -62,15 +62,14 @@ class Color() { // default constructor creates a white color.
 
         // blue
 
-        if(temperature >= 66) {
+        if(temperature >= 65) {
             blue = 255.0
         } else {
 
-            if (temperature <= 19) {
+            if (temperature <= 17) {
                 blue = 0.0
             } else {
-                blue = temperature - 10
-                blue = 138.5177312231 * ln(blue) - 305.0447927307
+                blue = 138.5177312231 * ln(temperature - 8) - 305.0447927307
                 if (blue < 0) {
                     blue = 0.0
                 } else if (blue > 255) {
@@ -85,6 +84,10 @@ class Color() { // default constructor creates a white color.
 
     fun toArgb() : Int {
         return android.graphics.Color.argb(255, red, green, blue)
+    }
+
+    fun hasWhite() : Boolean {
+        return red > 0 && green > 0 && blue > 0
     }
 
     override fun toString() : String {

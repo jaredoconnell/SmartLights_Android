@@ -80,7 +80,7 @@ class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledS
     {
         // Show the seekbar
         colorTempSeekBar.thumb.mutate().alpha = 255
-        val colorTemp = progress * 200 + 1000;
+        val colorTemp = progress * 100 + 1000;
         val color = Color(colorTemp, 255)
         onSelectedColor(color)
         colorPicker.setColor(lastColor)
@@ -92,7 +92,7 @@ class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledS
         lastColor = color.toArgb()
         backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
         if (ledStrip != null) {
-            SetColorForLEDStripPacket(ledStrip, color, 5).queue()
+            SetColorForLEDStripPacket(ledStrip, color, 5000u).queue()
         }
     }
 

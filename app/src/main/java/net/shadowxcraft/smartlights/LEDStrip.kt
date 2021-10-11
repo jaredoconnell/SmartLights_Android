@@ -92,7 +92,10 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
      * then convert that to linear.
      */
     open fun setBrightnessExponential(exponentialInput: Int, save: Boolean) {
-        setBrightness(convertToLinear(exponentialInput), save)
+        var brightness = convertToLinear(exponentialInput)
+        if (brightness <= 0)
+            brightness = 1
+        setBrightness(brightness, save)
         Log.println(Log.INFO,"LEDStrip", "Set brightness to $brightness")
     }
 
@@ -144,7 +147,7 @@ open class LEDStrip(val id: String, val name: String, val controller: ESP32)
         return convertToExponential(brightness)
     }
 
-    fun sendBrightnessPacket() {
-        SetBrightnessForLEDStrip(this).queue()
+    fun sendBrightnessPacket(sendOnState: Boolean) {
+        SetBrightnessForLEDStrip(this, sendOnState).queue()
     }
 }

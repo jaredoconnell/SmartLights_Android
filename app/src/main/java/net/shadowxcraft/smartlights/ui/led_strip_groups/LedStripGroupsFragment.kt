@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,15 +38,15 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
             Utils.replaceFragment(ControllersFragment(), parentFragmentManager)
         }
 
-        // Create adapter that uses the list of LED strips.
-        adapter = LEDStripListAdapter(this)
-
         // Lookup the recyclerview in activity layout
         val rvControllers = root.findViewById(R.id.list_led_strip) as RecyclerView
         rvControllers.setHasFixedSize(true)
         val itemDecoration: RecyclerView.ItemDecoration =
             DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         rvControllers.addItemDecoration(itemDecoration)
+
+        // Create adapter that uses the list of LED strips.
+        adapter = LEDStripListAdapter(this, rvControllers)
 
 
         // Attach the adapter to the recyclerview to populate items
@@ -71,7 +72,11 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
                 Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
             }
             R.id.set_color_button -> {
-                dialog = ColorEditorDialog(BLEControllerManager.activity!!, Color(255, 0, 0), ledStrip)
+                dialog = ColorEditorDialog(
+                    BLEControllerManager.activity!!,
+                    Color(255, 0, 0),
+                    ledStrip
+                )
                 dialog!!.listener = this
                 dialog!!.display()
             }
@@ -87,7 +92,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         dialog!!.ledStrip!!.setCurrentSeq(null, true)
         // Clear the preview that likely built up.
         dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
-        SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0).send()// indefinitely
+        SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0u).send()// indefinitely
     }
 
     /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -105,7 +110,8 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
 class LEDStripListAdapter(
-    private val setColorClickListener: ButtonClickListener)
+    private val setColorClickListener: ButtonClickListener, private val view: RecyclerView
+)
     : RecyclerView.Adapter<LEDStripListAdapter.ViewHolder?>()
 {
 
@@ -120,7 +126,7 @@ class LEDStripListAdapter(
         private val colorsButtonView: ImageView = itemView.findViewById(R.id.set_colors_button)
         private val colorButtonView: ImageView = itemView.findViewById(R.id.set_color_button)
         private val editSchedulesView: ImageView = itemView.findViewById(R.id.edit_schedules_button)
-        private val offOnStateToggle: Button = itemView.findViewById(R.id.on_off_switch)
+        private val offOnStateToggle: SwitchCompat = itemView.findViewById(R.id.on_off_switch)
         private val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
         private var ledStripGroup: LEDStripGroup? = null
 
@@ -128,27 +134,41 @@ class LEDStripListAdapter(
         fun setLEDStripGroup(ledStripGroup: LEDStripGroup) {
             this.ledStripGroup = ledStripGroup
             nameView.text = ledStripGroup.name
-            //offOnStateToggle.isChecked = ledStripGroup.onState
-            offOnStateToggle.setOnClickListener {
-                ledStripGroup.setOnState(onState=false, save=true)
-                ledStripGroup.sendBrightnessPacket()
+            offOnStateToggle.isChecked = ledStripGroup.onState
+            offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
+                if (offOnStateToggle.isPressed) {
+                    ledStripGroup.setOnState(isChecked, true)
+                    ledStripGroup.sendBrightnessPacket(true)
+                    this@LEDStripListAdapter.notifyDataSetChanged()
+                }
             }
             brightnessBar.max = MAX_BRIGHTNESS
-            brightnessBar.thumb.mutate().alpha = 0
+            brightnessBar.progress = ledStripGroup.getBrightnessExponential()
             brightnessBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seek: SeekBar,
-                                               progress: Int, fromUser: Boolean)
-                {
-                    ledStripGroup.setBrightnessExponential(progress, true)
-                    ledStripGroup.setOnState(onState=true, save=true) // so groups don't conflict.
-                    ledStripGroup.sendBrightnessPacket()
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    progress: Int, fromUser: Boolean
+                ) {
+                    if (fromUser)
+                        setBrightness(seekBar, progress, false)
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    seekBar?.let { setBrightness(seekBar, it.progress, true) }
+                }
+
+                fun setBrightness(seekBar: SeekBar?, newVal: Int, updateList: Boolean) {
+                    if (seekBar != null) {
+                        ledStripGroup.setBrightnessExponential(seekBar.progress, true)
+                    }
+                    ledStripGroup.sendBrightnessPacket(false)
+                    if (updateList) {
+                        view.post(Runnable { this@LEDStripListAdapter.notifyDataSetChanged() })
+                    }
                 }
             })
             colorsButtonView.setOnClickListener {
@@ -168,7 +188,7 @@ class LEDStripListAdapter(
         val inflater = LayoutInflater.from(context)
 
         // Inflate the custom layout
-        val deviceView: View = inflater.inflate(R.layout.item_led_strip_group, parent, false)
+        val deviceView: View = inflater.inflate(R.layout.item_led_strip, parent, false)
 
         // Return a new holder instance
         return ViewHolder(deviceView)

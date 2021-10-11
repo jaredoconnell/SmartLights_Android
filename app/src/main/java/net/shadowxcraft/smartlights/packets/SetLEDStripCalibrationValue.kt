@@ -5,17 +5,17 @@ import net.shadowxcraft.smartlights.ESP32
 import net.shadowxcraft.smartlights.LEDStrip
 import net.shadowxcraft.smartlights.PWMDriver
 
-class SetColorForLEDStripPacket(private val ledStrip: LEDStrip,
-                                private val color: Color,
-                                private val milliseconds: UInt)
-    : SendablePacket(ledStrip.controller, 19)
+class SetLEDStripCalibrationValue(private val ledStrip: LEDStrip,
+                                  private val selectedIndex: Int,
+                                  private val calibratedValue: Int)
+    : SendablePacket(ledStrip.controller, 24)
 {
     override fun send() {
         val output = getHeader()
 
         output.addAll(strToByteList(ledStrip.id))
-        output.addAll(colorToByteList(color))
-        output.addAll(intToByteList(milliseconds))
+        output.add(selectedIndex.toByte())
+        output.addAll(shortToByteList(calibratedValue))
         sendData(output.toByteArray())
 
     }

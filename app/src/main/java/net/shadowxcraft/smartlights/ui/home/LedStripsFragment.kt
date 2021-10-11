@@ -6,17 +6,19 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.BLEControllerManager.activity
 import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
+import net.shadowxcraft.smartlights.ui.calibrate_led_strip.CalibrateLedStripFragment
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
 import net.shadowxcraft.smartlights.ui.schedules.SchedulesFragment
+
 
 
 class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.ColorSelectedListener {
@@ -41,7 +43,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         }
 
         // Create adapter that uses the list of LED strips.
-        adapter = LEDStripListAdapter(this)
+        adapter = LEDStripListAdapter(this, parentFragmentManager)
 
         // Lookup the recyclerview in activity layout
         val rvControllers = root.findViewById(R.id.list_led_strip) as RecyclerView
@@ -79,7 +81,11 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
                 Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
             }
             R.id.set_color_button -> {
-                dialog = ColorEditorDialog(BLEControllerManager.activity!!, ledStrip!!.simpleColor, ledStrip)
+                dialog = ColorEditorDialog(
+                    BLEControllerManager.activity!!,
+                    ledStrip!!.simpleColor,
+                    ledStrip
+                )
                 dialog!!.listener = this
                 dialog!!.display()
             }
@@ -94,7 +100,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         dialog!!.ledStrip!!.setCurrentSeq(null, true)
         // Clear the preview that likely built up.
         dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
-        SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0).send()// indefinitely
+        SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0u).send()// indefinitely
         adapter?.notifyDataSetChanged()
     }
 
@@ -113,15 +119,21 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
 class LEDStripListAdapter(
-    private val setColorClickListener: ButtonClickListener)
+    private val setColorClickListener: ButtonClickListener,
+    private val parentFragmentManager: FragmentManager
+)
     : RecyclerView.Adapter<LEDStripListAdapter.ViewHolder?>()
 {
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     inner class ViewHolder(itemView: View)
-        : RecyclerView.ViewHolder(itemView)
-    {
+        : RecyclerView.ViewHolder(itemView), View.OnLongClickListener,
+        PopupMenu.OnMenuItemClickListener {
+        init {
+            itemView.setOnLongClickListener(this)
+        }
+
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         private val nameView: TextView = itemView.findViewById(R.id.led_strip_name)
@@ -140,7 +152,7 @@ class LEDStripListAdapter(
             offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
                 if (offOnStateToggle.isPressed) {
                     ledStrip.setOnState(isChecked, true)
-                    ledStrip.sendBrightnessPacket()
+                    ledStrip.sendBrightnessPacket(true)
                     if (isChecked && ledStrip.brightness < 300
                         && (activity as MainActivity).getLuxVal() > 100
                     ) {
@@ -156,9 +168,10 @@ class LEDStripListAdapter(
             brightnessBar.progress = ledStrip.getBrightnessExponential()
             brightnessBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seek: SeekBar,
-                                               newProgress: Int, fromUser: Boolean)
-                {
+                override fun onProgressChanged(
+                    seek: SeekBar,
+                    newProgress: Int, fromUser: Boolean
+                ) {
                     val currentProgress = ledStrip.getBrightnessExponential()
                     if (newProgress != currentProgress) {
                         ledStrip.setBrightnessExponential(newProgress, true)
@@ -166,7 +179,7 @@ class LEDStripListAdapter(
                             // It's low enough that it rounds down to 0
                             brightnessBar.progress = 0
                         }
-                        ledStrip.sendBrightnessPacket()
+                        ledStrip.sendBrightnessPacket(true)
                     }
                 }
 
@@ -186,6 +199,26 @@ class LEDStripListAdapter(
                 setColorClickListener.onButtonClicked(adapterPosition, R.id.edit_schedules_button)
             }
             colorButtonView.drawable.mutate().setTint(ledStrip.simpleColor.toArgb())
+        }
+
+        override fun onLongClick(view: View): Boolean {
+            val popup = PopupMenu(itemView.context, itemView)
+            val inflater = popup.menuInflater
+            inflater.inflate(R.menu.led_strip_item_menu, popup.menu)
+            popup.show()
+            popup.setOnMenuItemClickListener(this);
+            // Return true to indicate the click was handled
+            return true
+        }
+
+        override fun onMenuItemClick(item: MenuItem): Boolean {
+            return when (item.itemId) {
+                R.id.calibrate -> {
+                    Utils.replaceFragment(ledStrip?.let { CalibrateLedStripFragment(it) }, parentFragmentManager)
+                    true
+                }
+                else -> false
+            }
         }
     }
 

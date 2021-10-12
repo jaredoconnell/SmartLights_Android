@@ -3,7 +3,7 @@ package net.shadowxcraft.smartlights.packets
 import net.shadowxcraft.smartlights.ESP32
 import net.shadowxcraft.smartlights.PWMDriver
 
-class PWMDriversListResponse(controller: ESP32, bytes: ByteArray)
+class PWMDriversListResponse(controller: ESP32, bytes: UByteArray)
     : ReceivedPacket(controller, bytes)
 {
     override fun process() {

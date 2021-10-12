@@ -5,7 +5,7 @@ import net.shadowxcraft.smartlights.ESP32
 import net.shadowxcraft.smartlights.LEDStrip
 import net.shadowxcraft.smartlights.LEDStripComponent
 
-class LEDStripsListResponse(controller: ESP32, bytes: ByteArray)
+class LEDStripsListResponse(controller: ESP32, bytes: UByteArray)
     : ReceivedPacket(controller, bytes)
 {
     override fun process() {

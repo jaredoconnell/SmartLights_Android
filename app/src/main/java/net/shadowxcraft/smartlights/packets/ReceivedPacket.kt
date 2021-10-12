@@ -3,13 +3,13 @@ package net.shadowxcraft.smartlights.packets
 import android.util.Log
 import net.shadowxcraft.smartlights.*
 
-abstract class ReceivedPacket(protected val controller: ESP32, private val bytes: ByteArray) {
+abstract class ReceivedPacket @ExperimentalUnsignedTypes constructor(protected val controller: ESP32, private val bytes: UByteArray) {
     private var index = 1 // skip 0, the packet ID
 
     abstract fun process()
 
     protected fun getByte() : Int {
-        return bytes[index++].toUByte().toInt()
+        return bytes[index++].toInt()
     }
 
     protected fun getShort() : Int {
@@ -27,7 +27,7 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
         val length = bytes[index++].toInt()
         var str = ""
         for (i in 0 until length) {
-            str += bytes[index++].toChar()
+            str += bytes[index++].toByte().toChar()
         }
         return str
     }
@@ -43,13 +43,13 @@ abstract class ReceivedPacket(protected val controller: ESP32, private val bytes
     protected fun bytesToLEDStrip() : LEDStrip {
         val id = bytesToStr()
         val components = ArrayList<LEDStripComponent>()
-        val numColors = getByte()
         val currentSequenceID = bytesToStr()
         val isOn = getByte() != 0
         val brightness = getShort()
         val hasTemporaryColor = getByte() != 0
         val secondsLeftTempColor = getShort()
         val tempColor = bytesToColor()
+        val numColors = getByte()
         for (i in 0 until numColors) {
             val driverAddr = getByte()
             val pin = getByte()

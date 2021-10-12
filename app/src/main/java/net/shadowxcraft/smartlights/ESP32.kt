@@ -203,6 +203,16 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
          }
     }
 
+    fun getLEDStrip(id: String): LEDStrip? {
+        if (ledStrips.containsKey(id)) {
+            return ledStrips[id]
+        }
+        if (ledStripGroups.containsKey(id)) {
+            return ledStripGroups[id]
+        }
+        return null;
+    }
+
     fun addColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
         //if (!colorsSequences.contains(colorSequence.id)) {
         SharedData.colorsSequences[colorSequence.id] = colorSequence
@@ -351,8 +361,8 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     }
 
     @ExperimentalUnsignedTypes
-    private fun getPacket(value: ByteArray) : ReceivedPacket {
-        return when(value[0].toUByte().toInt()) {
+    private fun getPacket(value: UByteArray) : ReceivedPacket {
+        return when(value[0].toInt()) {
             255 -> PWMDriversListResponse(this, value)
             254 -> LEDStripsListResponse(this, value)
             252 -> LEDStripColorSequenceListResponse(this, value)
@@ -360,6 +370,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
             250 -> ScheduledChangeListResponse(this, value)
             245 -> LEDStripGroupsListResponse(this, value)
             244 -> ReceivedPacketNotificationResponse(this, value)
+            243 -> ReceivedLEDStripUpdate(this, value)
             else -> throw IllegalStateException("Unknown packet ID ${value[0].toInt()}")
         }
     }
@@ -382,7 +393,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
         status: GattStatus
     ) {
         Log.println(Log.INFO, "ESP32", "onCharacteristicUpdate got packet!")
-        val packet: ReceivedPacket? = value?.let { getPacket(it) }
+        val packet: ReceivedPacket? = value?.let { getPacket(it.toUByteArray()) }
         Log.println(Log.INFO, "ESP32", "Packet: " + packet?.javaClass?.name)
         packet?.process()
         /*Toast.makeText(

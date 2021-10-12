@@ -126,7 +126,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
         activity?.runOnUiThread {
             Toast.makeText(
                 activity,
-                "Bluetooth Connection Failed.",
+                "Bluetooth Connection Failed: $status",
                 Toast.LENGTH_SHORT
             ).show()
         }

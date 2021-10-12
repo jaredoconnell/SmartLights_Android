@@ -3,7 +3,7 @@ package net.shadowxcraft.smartlights.packets
 import android.util.Log
 import net.shadowxcraft.smartlights.ESP32
 
-class ScheduledChangeListResponse(controller: ESP32, bytes: ByteArray)
+class ScheduledChangeListResponse(controller: ESP32, bytes: UByteArray)
     : ReceivedPacket(controller, bytes)
 {
     override fun process() {

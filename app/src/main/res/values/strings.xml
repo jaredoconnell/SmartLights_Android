@@ -53,4 +53,6 @@
     <string name="title_settings">Settings</string>
     <string name="turn_off">Turn off</string>
     <string name="calibrate">Calibrate</string>
+    <string name="drag">Press and hold to drag</string>
+    <string name="reorder_menu_item">Reorder Items</string>
 </resources>

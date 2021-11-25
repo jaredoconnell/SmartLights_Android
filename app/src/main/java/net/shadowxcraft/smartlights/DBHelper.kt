@@ -16,6 +16,9 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_GROUP_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_GROUP_ITEM_TABLE)
         db.execSQL(SQLTableData.SQL_CREATE_SCHEDULED_CHANGE_TABLE)
+        db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_DISPLAY_OPTIONS_TABLE)
+        db.execSQL(SQLTableData.SQL_CREATE_LEDSTRIP_GROUP_DISPLAY_OPTIONS_TABLE)
+        db.execSQL(SQLTableData.SQL_CREATE_COLOR_SEQUENCE_DISPLAY_OPTIONS_TABLE)
     }
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // No upgrades known right now

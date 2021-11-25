@@ -83,6 +83,8 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 loadPWMDrivers(db)
                 loadLEDStrips(db)
                 loadLEDStripGroups(db)
+                loadLEDStripOrders(db)
+                loadLEDStripGroupOrders(db)
                 SharedData.loaded = true
             } catch (any: Exception) {
                 Log.e( "MainActivity", "Exception in loadFromDB", any)
@@ -361,6 +363,75 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         cursor.close()
     }
 
+    private fun loadLEDStripOrders(db: SQLiteDatabase) {
+        ControllerManager.ledStripOrders.clear()
+        val selectedCols = arrayOf(
+            SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID,
+            SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_POSITION
+        )
+        val cursor = db.query(
+            SQLTableData.LEDStripDisplayOptionsEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_POSITION
+        )
+        var lastPosition = -1
+        while (cursor.moveToNext()) {
+            val uuid = cursor.getString(0)
+            val position = cursor.getInt(1)
+
+            if (position != lastPosition + 1) {
+                Log.println(Log.WARN, "MainActivity", "Invalid position while loading led strip positions")
+            }
+            lastPosition = position
+
+            val ledStrip = ControllerManager.getLEDStripByID(uuid)
+            if (ledStrip == null) {
+                Log.println(Log.WARN, "MainActivity", "Could not find LED Strip by UUID while loading positions.")
+                continue
+            }
+            ControllerManager.ledStripOrders.add(ledStrip)
+
+        }
+        cursor.close()
+    }
+
+    private fun loadLEDStripGroupOrders(db: SQLiteDatabase) {
+        ControllerManager.ledStripOrders.clear()
+        val selectedCols = arrayOf(
+            SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID,
+            SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION
+        )
+        val cursor = db.query(
+            SQLTableData.LEDStripGroupDisplayOptionsEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION
+        )
+        var lastPosition = -1
+        while (cursor.moveToNext()) {
+            val uuid = cursor.getString(0)
+            val position = cursor.getInt(1)
+
+            if (position != lastPosition + 1) {
+                Log.println(Log.WARN, "MainActivity", "Invalid position while loading led strip positions")
+            }
+            lastPosition = position
+
+            val ledStrip = ControllerManager.getLEDStripByID(uuid) as LEDStripGroup
+
+            ControllerManager.ledStripGroupOrders.add(ledStrip)
+
+        }
+        cursor.close()
+    }
+
     private fun getLEDStripsForGroup(controller: ESP32, groupID: String, db: SQLiteDatabase) : ArrayList<LEDStrip> {
         val ledStrips = ArrayList<LEDStrip>()
 
@@ -429,7 +500,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         BLEControllerManager.init(this)
 
         Handler().postDelayed({
-            //ControllerManager.connectAll()
+            ControllerManager.connectAll()
         }, 1500)
     }
 

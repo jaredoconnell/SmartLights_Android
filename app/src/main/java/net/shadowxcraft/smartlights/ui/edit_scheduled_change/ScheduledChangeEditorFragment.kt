@@ -1,21 +1,19 @@
 package net.shadowxcraft.smartlights.ui.edit_scheduled_change
 
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.R.layout
 import net.shadowxcraft.smartlights.packets.ScheduleChangePacket
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
-import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
@@ -30,10 +28,10 @@ class ScheduledChangeEditorFragment(private val scheduledChange: ScheduledChange
     private lateinit var powerRadioGroup: RadioGroup
     private lateinit var colorRadioGroup: RadioGroup
     private lateinit var dateRadioGroup: RadioGroup
-    private lateinit var brightnessChangeToggle: Switch
+    private lateinit var brightnessChangeToggle: SwitchCompat
     private lateinit var brightnessChangeSlider: SeekBar
     private lateinit var dateFlipper: ViewFlipper
-    private lateinit var turnOffToggleSwitch: Switch
+    private lateinit var turnOffToggleSwitch: SwitchCompat
     private lateinit var selectPowerOffSection: LinearLayout
     private lateinit var minutesRuntimeSection: LinearLayout
     private lateinit var nameTextEdit: EditText
@@ -49,7 +47,9 @@ class ScheduledChangeEditorFragment(private val scheduledChange: ScheduledChange
     ): View {
         // Inflate the layout for this fragment
         if (scheduledChange.year <= 1970) { // Unchanged
-            scheduledChange.setFromLocalDateTime(scheduledChange.getNowLocal().plusMinutes(30))
+            // Start with 30 min from now, with seconds set to 0.
+            scheduledChange.setFromLocalDateTime(scheduledChange
+                .getNowLocal().plusMinutes(30).withSecondOfMinute(0))
         }
 
         currentView = inflater.inflate(layout.fragment_edit_scheduled_change, container, false)

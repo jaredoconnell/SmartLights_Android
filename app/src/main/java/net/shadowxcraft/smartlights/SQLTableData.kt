@@ -65,6 +65,37 @@ object SQLTableData {
         const val COLUMN_NAME_DRIVER_PIN = "pin"
     }
 
+    const val SQL_CREATE_LEDSTRIP_DISPLAY_OPTIONS_TABLE = "CREATE TABLE `${LEDStripDisplayOptionsEntry.TABLE_NAME}` (" +
+            "`${LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID}` TEXT NOT NULL," +
+            "`${LEDStripDisplayOptionsEntry.COLUMN_NAME_POSITION}` INTEGER PRIMARY KEY NOT NULL)"
+
+    object LEDStripDisplayOptionsEntry {
+        const val TABLE_NAME = "led_strip_display_options"
+        const val COLUMN_NAME_LEDSTRIP_ID = "id"
+        const val COLUMN_NAME_POSITION = "position"
+    }
+
+    const val SQL_CREATE_LEDSTRIP_GROUP_DISPLAY_OPTIONS_TABLE = "CREATE TABLE `${LEDStripGroupDisplayOptionsEntry.TABLE_NAME}` (" +
+            "`${LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID}` TEXT NOT NULL," +
+            "`${LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION}` INTEGER PRIMARY KEY NOT NULL)"
+
+    object LEDStripGroupDisplayOptionsEntry {
+        const val TABLE_NAME = "led_strip_group_display_options"
+        const val COLUMN_NAME_LEDSTRIP_ID = "id"
+        const val COLUMN_NAME_POSITION = "position"
+    }
+
+    const val SQL_CREATE_COLOR_SEQUENCE_DISPLAY_OPTIONS_TABLE = "CREATE TABLE `${ColorSequenceDisplayOptionsEntry.TABLE_NAME}` (" +
+            "`${ColorSequenceDisplayOptionsEntry.COLUMN_NAME_COLOR_SEQUENCE_ID}` TEXT NOT NULL," +
+                    "`${ColorSequenceDisplayOptionsEntry.COLUMN_NAME_POSITION}` INTEGER PRIMARY KEY NOT NULL)"
+
+    object ColorSequenceDisplayOptionsEntry {
+        const val TABLE_NAME = "color_sequence_display_options"
+        const val COLUMN_NAME_COLOR_SEQUENCE_ID = "id"
+        const val COLUMN_NAME_POSITION = "position"
+
+    }
+
     const val SQL_CREATE_LEDSTRIP_GROUP_TABLE = "CREATE TABLE `${LEDStripGroupEntry.TABLE_NAME}` (" +
             "`uuid` TEXT PRIMARY KEY NOT NULL," +
             "`${LEDStripGroupEntry.COLUMN_NAME_NAME}` TEXT NOT NULL," +

@@ -7,6 +7,7 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.shadowxcraft.smartlights.*
@@ -23,11 +24,15 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
 
     var dialog: ColorEditorDialog? = null
 
+    private lateinit var rvControllers: RecyclerView
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        ControllerManager.checkLedStripGroupOrders()
+
         val root = inflater.inflate(R.layout.fragment_led_strips, container, false)
 
         setHasOptionsMenu(true)
@@ -39,7 +44,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         }
 
         // Lookup the recyclerview in activity layout
-        val rvControllers = root.findViewById(R.id.list_led_strip) as RecyclerView
+        rvControllers = root.findViewById(R.id.list_led_strip) as RecyclerView
         rvControllers.setHasFixedSize(true)
         val itemDecoration: RecyclerView.ItemDecoration =
             DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
@@ -95,15 +100,75 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0u).send()// indefinitely
     }
 
-    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.open_controller_menu -> {
-                Utils.replaceFragment(Bluetooth, fragmentManager)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.led_strip_list_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        return if (id == R.id.action_reorder) {
+            toggleReorderMode()
+            true
+        } else super.onOptionsItemSelected(item)
+    }
+
+    private fun toggleReorderMode() {
+        if (adapter == null)
+            return
+        adapter?.reorderMode = !adapter!!.reorderMode
+        adapter?.notifyDataSetChanged()
+
+        if (adapter!!.reorderMode) {
+            itemTouchHelper.attachToRecyclerView(rvControllers)
+            Toast.makeText(context, "Reordering mode enabled", Toast.LENGTH_SHORT).show()
+        } else {
+            itemTouchHelper.attachToRecyclerView(null)
+            Toast.makeText(context, "Reordering mode disabled", Toast.LENGTH_SHORT).show()
         }
-    }*/
+    }
+
+
+    private val itemTouchHelper by lazy {
+        val simpleItemTouchCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN
+                    or ItemTouchHelper.START or ItemTouchHelper.END, 0)
+        {
+
+            override fun onMove(recyclerView: RecyclerView,
+                                viewHolder: RecyclerView.ViewHolder,
+                                target: RecyclerView.ViewHolder): Boolean {
+                if (!adapter!!.reorderMode)
+                    return false
+                val adapter = recyclerView.adapter as RecyclerView.Adapter<*>
+                val from = viewHolder.adapterPosition
+                val to = target.adapterPosition
+                ControllerManager.moveLEDStripGroupOrder(from, to)
+                adapter.notifyItemMoved(from, to)
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            }
+
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                super.onSelectedChanged(viewHolder, actionState)
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                    viewHolder?.itemView?.alpha = 0.5f
+                }
+            }
+
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                super.clearView(recyclerView, viewHolder)
+
+                viewHolder?.itemView?.alpha = 1.0f
+            }
+        }
+
+        ItemTouchHelper(simpleItemTouchCallback)
+    }
 }
 
 
@@ -114,6 +179,8 @@ class LEDStripListAdapter(
 )
     : RecyclerView.Adapter<LEDStripListAdapter.ViewHolder?>()
 {
+
+    var reorderMode = false
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -128,6 +195,7 @@ class LEDStripListAdapter(
         private val editSchedulesView: ImageView = itemView.findViewById(R.id.edit_schedules_button)
         private val offOnStateToggle: SwitchCompat = itemView.findViewById(R.id.on_off_switch)
         private val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
+        private val dragHandle: ImageView = itemView.findViewById(R.id.drag_handle)
         private var ledStripGroup: LEDStripGroup? = null
 
 
@@ -141,6 +209,11 @@ class LEDStripListAdapter(
                     ledStripGroup.sendBrightnessPacket(true)
                     this@LEDStripListAdapter.notifyDataSetChanged()
                 }
+            }
+            dragHandle.visibility = if (reorderMode) {
+                View.VISIBLE
+            } else {
+                View.GONE
             }
             brightnessBar.max = MAX_BRIGHTNESS
             brightnessBar.progress = ledStripGroup.getBrightnessExponential()
@@ -202,16 +275,11 @@ class LEDStripListAdapter(
     }
 
     fun getNthLEDStripGroup(index: Int) : LEDStripGroup? {
-        var controllerIndex = 0
-        var positionsRemaining = index
-        while (ControllerManager.controllers[controllerIndex].ledStripGroups.size < positionsRemaining) {
-            positionsRemaining -= ControllerManager.controllers[controllerIndex].ledStripGroups.size
-            controllerIndex++
-        }
-        val ledStripGroups = ControllerManager.controllers[controllerIndex].ledStripGroups
-        if (positionsRemaining >= ledStripGroups.values.size)
+        if (index >= ControllerManager.ledStripGroupOrders.size)
+            ControllerManager.checkLedStripOrders()
+        if (index >= ControllerManager.ledStripGroupOrders.size)
             return null
-        return ledStripGroups.values.toTypedArray()[positionsRemaining]
+        return ControllerManager.ledStripGroupOrders[index]
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

@@ -59,6 +59,15 @@
                 android:layout_margin="8dp"
                 app:srcCompat="@drawable/ic_baseline_timer_24"
                 android:contentDescription="@string/edit_timers_button_description" />
+            <ImageView
+                android:id="@+id/drag_handle"
+                android:layout_height="51dp"
+                android:layout_margin="0dp"
+                android:layout_width="0dp"
+                app:srcCompat="@drawable/ic_baseline_drag_handle_24"
+                android:layout_weight="1"
+                android:visibility="gone"
+                android:contentDescription="@string/drag"/>
         </LinearLayout>
 
         <LinearLayout

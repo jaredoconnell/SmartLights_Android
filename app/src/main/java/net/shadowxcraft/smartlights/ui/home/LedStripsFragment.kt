@@ -36,7 +36,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        ControllerManager.checkLedStripOrders()
+        OrderingManager.checkLedStripOrders()
 
         val root = inflater.inflate(R.layout.fragment_led_strips, container, false)
 
@@ -157,7 +157,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
                 val adapter = recyclerView.adapter as RecyclerView.Adapter<*>
                 val from = viewHolder.adapterPosition
                 val to = target.adapterPosition
-                ControllerManager.moveLEDStripOrder(from, to)
+                OrderingManager.moveLEDStripOrder(from, to)
                 adapter.notifyItemMoved(from, to)
                 return true
             }
@@ -176,7 +176,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
 
-                viewHolder?.itemView?.alpha = 1.0f
+                viewHolder.itemView.alpha = 1.0f
             }
         }
 
@@ -323,11 +323,11 @@ class LEDStripListAdapter(
     }
 
     fun getNthLEDStrip(index: Int) : LEDStrip? {
-        if (index >= ControllerManager.ledStripOrders.size)
-            ControllerManager.checkLedStripOrders()
-        if (index >= ControllerManager.ledStripOrders.size)
+        if (index >= OrderingManager.ledStripPositions.size)
+            OrderingManager.checkLedStripOrders()
+        if (index >= OrderingManager.ledStripPositions.size)
             return null
-        val uuid = ControllerManager.ledStripOrders[index]
+        val uuid = OrderingManager.ledStripPositions[index]
         return ControllerManager.getLEDStripByID(uuid)
     }
 

@@ -31,7 +31,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        ControllerManager.checkLedStripGroupOrders()
+        OrderingManager.checkLedStripGroupOrders()
 
         val root = inflater.inflate(R.layout.fragment_led_strips, container, false)
 
@@ -144,7 +144,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
                 val adapter = recyclerView.adapter as RecyclerView.Adapter<*>
                 val from = viewHolder.adapterPosition
                 val to = target.adapterPosition
-                ControllerManager.moveLEDStripGroupOrder(from, to)
+                OrderingManager.moveLEDStripGroupOrder(from, to)
                 adapter.notifyItemMoved(from, to)
                 return true
             }
@@ -275,11 +275,11 @@ class LEDStripListAdapter(
     }
 
     fun getNthLEDStripGroup(index: Int) : LEDStripGroup? {
-        if (index >= ControllerManager.ledStripGroupOrders.size)
-            ControllerManager.checkLedStripOrders()
-        if (index >= ControllerManager.ledStripGroupOrders.size)
+        if (index >= OrderingManager.ledStripGroupPositions.size)
+            OrderingManager.checkLedStripOrders()
+        if (index >= OrderingManager.ledStripGroupPositions.size)
             return null
-        val uuid = ControllerManager.ledStripGroupOrders[index]
+        val uuid = OrderingManager.ledStripGroupPositions[index]
         return ControllerManager.getLEDStripByID(uuid) as LEDStripGroup?
     }
 

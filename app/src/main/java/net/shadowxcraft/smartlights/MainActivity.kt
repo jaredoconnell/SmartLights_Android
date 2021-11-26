@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 loadLEDStripGroupOrders(db)
                 loadLEDStrips(db)
                 loadLEDStripGroups(db)
+                db.close()
                 SharedData.loaded = true
             } catch (any: Exception) {
                 Log.e( "MainActivity", "Exception in loadFromDB", any)
@@ -365,7 +366,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
 
     private fun loadLEDStripOrders(db: SQLiteDatabase) {
         Log.println(Log.DEBUG, "MainActivity", "Loading positions for LED strips")
-        ControllerManager.ledStripOrders.clear()
+        OrderingManager.ledStripPositions.clear()
         val selectedCols = arrayOf(
             SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID,
             SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_POSITION
@@ -390,14 +391,14 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             lastPosition = position
 
             Log.println(Log.DEBUG, "MainActivity", "$uuid at position $position")
-            ControllerManager.ledStripOrders.add(uuid)
+            OrderingManager.ledStripPositions.add(uuid)
 
         }
         cursor.close()
     }
 
     private fun loadLEDStripGroupOrders(db: SQLiteDatabase) {
-        ControllerManager.ledStripGroupOrders.clear()
+        OrderingManager.ledStripGroupPositions.clear()
         val selectedCols = arrayOf(
             SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID,
             SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION
@@ -421,7 +422,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             }
             lastPosition = position
 
-            ControllerManager.ledStripGroupOrders.add(uuid)
+            OrderingManager.ledStripGroupPositions.add(uuid)
 
         }
         cursor.close()

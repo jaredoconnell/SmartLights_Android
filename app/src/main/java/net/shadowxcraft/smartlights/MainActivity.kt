@@ -81,10 +81,10 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 loadColorSequenceColors(db)
                 loadControllers(db)
                 loadPWMDrivers(db)
-                loadLEDStrips(db)
-                loadLEDStripGroups(db)
                 loadLEDStripOrders(db)
                 loadLEDStripGroupOrders(db)
+                loadLEDStrips(db)
+                loadLEDStripGroups(db)
                 SharedData.loaded = true
             } catch (any: Exception) {
                 Log.e( "MainActivity", "Exception in loadFromDB", any)
@@ -364,6 +364,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
     }
 
     private fun loadLEDStripOrders(db: SQLiteDatabase) {
+        Log.println(Log.DEBUG, "MainActivity", "Loading positions for LED strips")
         ControllerManager.ledStripOrders.clear()
         val selectedCols = arrayOf(
             SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID,
@@ -388,19 +389,15 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             }
             lastPosition = position
 
-            val ledStrip = ControllerManager.getLEDStripByID(uuid)
-            if (ledStrip == null) {
-                Log.println(Log.WARN, "MainActivity", "Could not find LED Strip by UUID while loading positions.")
-                continue
-            }
-            ControllerManager.ledStripOrders.add(ledStrip)
+            Log.println(Log.DEBUG, "MainActivity", "$uuid at position $position")
+            ControllerManager.ledStripOrders.add(uuid)
 
         }
         cursor.close()
     }
 
     private fun loadLEDStripGroupOrders(db: SQLiteDatabase) {
-        ControllerManager.ledStripOrders.clear()
+        ControllerManager.ledStripGroupOrders.clear()
         val selectedCols = arrayOf(
             SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID,
             SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION
@@ -424,9 +421,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             }
             lastPosition = position
 
-            val ledStrip = ControllerManager.getLEDStripByID(uuid) as LEDStripGroup
-
-            ControllerManager.ledStripGroupOrders.add(ledStrip)
+            ControllerManager.ledStripGroupOrders.add(uuid)
 
         }
         cursor.close()

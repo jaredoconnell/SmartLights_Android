@@ -13,8 +13,8 @@ object ControllerManager {
     val controllerIDMap = HashMap<Int, ESP32>() // map addr to controller
     val controllers = ArrayList<ESP32>()
 
-    val ledStripOrders = ArrayList<LEDStrip>()
-    val ledStripGroupOrders = ArrayList<LEDStripGroup>()
+    val ledStripOrders = ArrayList<String>()
+    val ledStripGroupOrders = ArrayList<String>()
 
     fun addController(controller: ESP32) {
         if (controllerAddrMap.containsKey(controller.addr))
@@ -39,21 +39,13 @@ object ControllerManager {
         return null
     }
 
-    fun getLEDStripGroupByID(uuid: String) : LEDStrip? {
-        for (controller in controllers) {
-            val strip = controller.getLEDStrip(uuid)
-            if (strip != null)
-                return strip
-        }
-        return null
-    }
-
     fun checkLedStripOrders() {
+        Log.println(Log.DEBUG, "ControllerManager", "Num led strips in position list: " + ledStripOrders.size)
         for (controller in controllers) {
             for (ledStrip in controller.ledStrips) {
-                if (!containsLedStrip(ledStrip.value)) {
-                    Log.i("ControllerManager", "Missing LED Strip order. Adding...")
-                    ledStripOrders.add(ledStrip.value)
+                if (ledStrip.value.id !in ControllerManager.ledStripOrders) {
+                    Log.i("ControllerManager", "Missing LED Strip position. Adding...")
+                    ledStripOrders.add(ledStrip.value.id)
                     val position = ledStripOrders.size - 1
                     GlobalScope.launch {
                         withContext(Dispatchers.IO) {
@@ -71,15 +63,6 @@ object ControllerManager {
         }
     }
 
-    private fun containsLedStrip(ledStrip: LEDStrip) : Boolean {
-        for (i in ledStripOrders) {
-            if (i.id == ledStrip.id) {
-                return true
-            }
-        }
-        return false
-    }
-
     fun moveLEDStripOrder(from: Int, to: Int) {
         // Swap
         val ledStrip = ledStripOrders.removeAt(from)
@@ -92,12 +75,17 @@ object ControllerManager {
 
                 for (i in min until ledStripOrders.size) {
                     val curLedStrip = ledStripOrders[i]
-                    val database = DBHelper(curLedStrip.controller.act).writableDatabase
+                    val database = DBHelper(BLEControllerManager.activity!!.baseContext).writableDatabase
                     val values1 = ContentValues()
+                    Log.println(Log.DEBUG, "ControllerManager",
+                        "Saving $curLedStrip to position $i"
+                    )
                     values1.put(SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_POSITION, i)
-                    values1.put(SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID, curLedStrip.id)
+                    values1.put(SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID, curLedStrip)
                     database.insertWithOnConflict(SQLTableData.LEDStripDisplayOptionsEntry.TABLE_NAME,
                         null, values1, SQLiteDatabase.CONFLICT_REPLACE)
+                    database.delete(SQLTableData.LEDStripDisplayOptionsEntry.TABLE_NAME,
+                        SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_POSITION + " >= " + ledStripOrders.size, null)
                     database.close()
 
                 }
@@ -108,10 +96,10 @@ object ControllerManager {
     fun checkLedStripGroupOrders() {
         for (controller in controllers) {
             for (ledStrip in controller.ledStripGroups) {
-                if (!containsLedStripGroup(ledStrip.value)) {
-                    Log.i("ControllerManager", "Missing LED Strip order. Adding...")
-                    ledStripOrders.add(ledStrip.value)
-                    val position = ledStripOrders.size - 1
+                if (ledStrip.key !in ledStripGroupOrders) {
+                    Log.i("ControllerManager", "Missing LED Strip group position. Adding...")
+                    ledStripGroupOrders.add(ledStrip.value.id)
+                    val position = ledStripGroupOrders.size - 1
                     GlobalScope.launch {
                         withContext(Dispatchers.IO) {
                             val database = DBHelper(controller.act).writableDatabase
@@ -128,15 +116,6 @@ object ControllerManager {
         }
     }
 
-    private fun containsLedStripGroup(ledStrip: LEDStrip) : Boolean {
-        for (i in ledStripGroupOrders) {
-            if (i.id == ledStrip.id) {
-                return true
-            }
-        }
-        return false
-    }
-
     fun moveLEDStripGroupOrder(from: Int, to: Int) {
         // Swap
         val ledStrip = ledStripGroupOrders.removeAt(from)
@@ -149,12 +128,15 @@ object ControllerManager {
 
                 for (i in min until ledStripGroupOrders.size) {
                     val curLedStrip = ledStripGroupOrders[i]
-                    val database = DBHelper(curLedStrip.controller.act).writableDatabase
+                    val database = DBHelper(BLEControllerManager.activity!!.baseContext).writableDatabase
                     val values1 = ContentValues()
                     values1.put(SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION, i)
-                    values1.put(SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID, curLedStrip.id)
+                    values1.put(SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID, curLedStrip)
                     database.insertWithOnConflict(SQLTableData.LEDStripGroupDisplayOptionsEntry.TABLE_NAME,
                         null, values1, SQLiteDatabase.CONFLICT_REPLACE)
+
+                    database.delete(SQLTableData.LEDStripGroupDisplayOptionsEntry.TABLE_NAME,
+                        SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_POSITION + " >= " + ledStripGroupOrders.size, null)
                     database.close()
 
                 }

@@ -279,7 +279,8 @@ class LEDStripListAdapter(
             ControllerManager.checkLedStripOrders()
         if (index >= ControllerManager.ledStripGroupOrders.size)
             return null
-        return ControllerManager.ledStripGroupOrders[index]
+        val uuid = ControllerManager.ledStripGroupOrders[index]
+        return ControllerManager.getLEDStripByID(uuid) as LEDStripGroup?
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

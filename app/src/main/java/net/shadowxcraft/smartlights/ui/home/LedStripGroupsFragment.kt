@@ -1,4 +1,4 @@
-package net.shadowxcraft.smartlights.ui.led_strip_groups
+package net.shadowxcraft.smartlights.ui.home
 
 import android.content.Context
 import android.os.Bundle
@@ -15,6 +15,7 @@ import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
+import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
 import net.shadowxcraft.smartlights.ui.schedules.SchedulesFragment
 
 
@@ -31,7 +32,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        OrderingManager.checkLedStripGroupOrders()
+        OrderingManager.checkLedStripOrders(true)
 
         val root = inflater.inflate(R.layout.fragment_led_strips, container, false)
 
@@ -51,7 +52,8 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         rvControllers.addItemDecoration(itemDecoration)
 
         // Create adapter that uses the list of LED strips.
-        adapter = LEDStripListAdapter(this, rvControllers)
+        adapter = LEDStripListAdapter(this, parentFragmentManager, true)
+        //adapter = LEDStripGroupListAdapter(this, rvControllers)
 
 
         // Attach the adapter to the recyclerview to populate items
@@ -71,7 +73,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
     }
 
     override fun onButtonClicked(position: Int, itemId: Int) {
-        val ledStrip = adapter!!.getNthLEDStripGroup(position)
+        val ledStrip = adapter!!.getNthLEDStrip(position)
         when (itemId) {
             R.id.set_colors_button -> {
                 Utils.replaceFragment(ColorsFragment(ledStrip), parentFragmentManager)
@@ -144,7 +146,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
                 val adapter = recyclerView.adapter as RecyclerView.Adapter<*>
                 val from = viewHolder.adapterPosition
                 val to = target.adapterPosition
-                OrderingManager.moveLEDStripGroupOrder(from, to)
+                OrderingManager.moveLEDStripOrder(from, to, true)
                 adapter.notifyItemMoved(from, to)
                 return true
             }
@@ -168,131 +170,5 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         }
 
         ItemTouchHelper(simpleItemTouchCallback)
-    }
-}
-
-
-// Create the basic adapter extending from RecyclerView.Adapter
-// Note that we specify the custom ViewHolder which gives us access to our views
-class LEDStripListAdapter(
-    private val setColorClickListener: ButtonClickListener, private val view: RecyclerView
-)
-    : RecyclerView.Adapter<LEDStripListAdapter.ViewHolder?>()
-{
-
-    var reorderMode = false
-
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
-    inner class ViewHolder(itemView: View)
-        : RecyclerView.ViewHolder(itemView)
-    {
-        // Your holder should contain a member variable
-        // for any view that will be set as you render a row
-        private val nameView: TextView = itemView.findViewById(R.id.led_strip_name)
-        private val colorsButtonView: ImageView = itemView.findViewById(R.id.set_colors_button)
-        private val colorButtonView: ImageView = itemView.findViewById(R.id.set_color_button)
-        private val editSchedulesView: ImageView = itemView.findViewById(R.id.edit_schedules_button)
-        private val offOnStateToggle: SwitchCompat = itemView.findViewById(R.id.on_off_switch)
-        private val brightnessBar: SeekBar = itemView.findViewById(R.id.brightness_bar)
-        private val dragHandle: ImageView = itemView.findViewById(R.id.drag_handle)
-        private var ledStripGroup: LEDStripGroup? = null
-
-
-        fun setLEDStripGroup(ledStripGroup: LEDStripGroup) {
-            this.ledStripGroup = ledStripGroup
-            nameView.text = ledStripGroup.name
-            offOnStateToggle.isChecked = ledStripGroup.onState
-            offOnStateToggle.setOnCheckedChangeListener { _, isChecked ->
-                if (offOnStateToggle.isPressed) {
-                    ledStripGroup.setOnState(isChecked, true)
-                    ledStripGroup.sendBrightnessPacket(true)
-                    this@LEDStripListAdapter.notifyDataSetChanged()
-                }
-            }
-            dragHandle.visibility = if (reorderMode) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-            brightnessBar.max = MAX_BRIGHTNESS
-            brightnessBar.progress = ledStripGroup.getBrightnessExponential()
-            brightnessBar.setOnSeekBarChangeListener(object :
-                SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar,
-                    progress: Int, fromUser: Boolean
-                ) {
-                    if (fromUser)
-                        setBrightness(seekBar, progress, false)
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    seekBar?.let { setBrightness(seekBar, it.progress, true) }
-                }
-
-                fun setBrightness(seekBar: SeekBar?, newVal: Int, updateList: Boolean) {
-                    if (seekBar != null) {
-                        ledStripGroup.setBrightnessExponential(seekBar.progress, true)
-                    }
-                    ledStripGroup.sendBrightnessPacket(false)
-                    if (updateList) {
-                        view.post(Runnable { this@LEDStripListAdapter.notifyDataSetChanged() })
-                    }
-                }
-            })
-            colorsButtonView.setOnClickListener {
-                setColorClickListener.onButtonClicked(adapterPosition, R.id.set_colors_button)
-            }
-            colorButtonView.setOnClickListener {
-                setColorClickListener.onButtonClicked(adapterPosition, R.id.set_color_button)
-            }
-            editSchedulesView.setOnClickListener {
-                setColorClickListener.onButtonClicked(adapterPosition, R.id.edit_schedules_button)
-            }
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val context: Context = parent.context
-        val inflater = LayoutInflater.from(context)
-
-        // Inflate the custom layout
-        val deviceView: View = inflater.inflate(R.layout.item_led_strip, parent, false)
-
-        // Return a new holder instance
-        return ViewHolder(deviceView)
-    }
-
-    override fun getItemCount(): Int {
-        var size = 0;
-        for (controller in ControllerManager.controllers)
-            size += controller.ledStripGroups.size
-        return size
-    }
-
-    fun getNthLEDStripGroup(index: Int) : LEDStripGroup? {
-        if (index >= OrderingManager.ledStripGroupPositions.size)
-            OrderingManager.checkLedStripOrders()
-        if (index >= OrderingManager.ledStripGroupPositions.size)
-            return null
-        val uuid = OrderingManager.ledStripGroupPositions[index]
-        return ControllerManager.getLEDStripByID(uuid) as LEDStripGroup?
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // Get the data model based on position
-        // Find the applicable controller
-        val component: LEDStripGroup? = getNthLEDStripGroup(position)
-            // Set item views based on your views and data model
-        if (component != null)
-            holder.setLEDStripGroup(component)
-
-        /*holder.colorView.setBackgroundColor(android.graphics.Color.argb(255, color.red, color.green, color.blue))
-        holder.driverView.text = component.driver.i2cAddress.toString()
-        holder.pinView.text = component.driverPin.toString()*/
     }
 }

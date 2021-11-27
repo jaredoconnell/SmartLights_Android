@@ -93,4 +93,11 @@ class Color() { // default constructor creates a white color.
     override fun toString() : String {
         return "Red: $red, Green: $green, Blue: $blue"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Color) {
+            return false
+        }
+        return other.red == red && other.green == green && other.blue == blue
+    }
 }

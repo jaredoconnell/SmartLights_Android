@@ -90,13 +90,6 @@ object BLEControllerManager : BluetoothCentralCallback() {
             connected[device.address] = controller
             bluetoothCentral!!.connectPeripheral(controller.device!!, controller)
             device.createBond()
-            activity?.runOnUiThread {
-                Toast.makeText(
-                    activity,
-                    "Connecting...",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
             return true
         }
     }
@@ -114,6 +107,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
 
     override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
         val controller = connected[peripheral.address]
+        controller?.connecting = false
         if (controller != null && !ControllerManager.controllerAddrMap.containsKey(controller.addr)) {
             ControllerManager.addController(controller)
             externConnectionListener?.onControllerChange(controller)
@@ -133,14 +127,8 @@ object BLEControllerManager : BluetoothCentralCallback() {
     }
 
     override fun onDisconnectedPeripheral(peripheral: BluetoothPeripheral, status: HciStatus) {
-        activity?.runOnUiThread {
-            Toast.makeText(
-                activity,
-                "Disconnected. Trying to reconnect...",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
         val controller = connected[peripheral.address]
+        controller?.onDisconnect()
         bluetoothCentral!!.connectPeripheral(peripheral, controller!!)
     }
 

@@ -33,6 +33,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     var dbId = -1 // -1 means none yet
     // Bluetooth stuff
     var device: BluetoothPeripheral? = null
+    var connecting = false
     // Other stuff
     private val pwmDriversByAddress: TreeMap<Int, PinDriver> = TreeMap()
     val pwmDriversByName: TreeMap<String, PinDriver> = TreeMap()
@@ -89,10 +90,16 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     }
 
     fun reconnect() {
+        connecting = true
+        SharedData.notifyDataChanged()
         if (device == null)
             BLEControllerManager.attemptToConnectToAddr(addr)
         else
             device?.let { BLEControllerManager.connectTo(it) }
+    }
+
+    fun onDisconnect() {
+        SharedData.notifyDataChanged()
     }
 
     /**
@@ -164,7 +171,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     fun addLEDStrip(strip: LEDStrip, sendPacket: Boolean, save: Boolean) {
         if (ledStrips.containsKey(strip.id)) {
             // Maybe throw error in the future
-            Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
+            Log.println(Log.INFO, "ESP32", "Already contains LED Strip")
         }
         ledStrips[strip.id] = strip
 
@@ -191,7 +198,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     fun addLEDStripGroup(group: LEDStripGroup, sendPacket: Boolean, save: Boolean) {
         if (ledStrips.containsKey(group.id)) {
             // Maybe throw error in the future
-            Log.println(Log.WARN, "ESP32", "Already contains LED Strip")
+            Log.println(Log.INFO, "ESP32", "Already contains LED Strip Group")
         }
         if (save)
             group.saveToDBFull()
@@ -261,10 +268,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
         if (device != null) {
             name = device!!.name!!
         }
-        Toast.makeText(BLEControllerManager.activity,
-            "Connected.",
-            Toast.LENGTH_SHORT
-        ).show()
+        SharedData.notifyDataChanged() // To display connecting status
 
         val exec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 

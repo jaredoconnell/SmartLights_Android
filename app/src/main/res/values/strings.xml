@@ -55,4 +55,12 @@
     <string name="calibrate">Calibrate</string>
     <string name="drag">Press and hold to drag</string>
     <string name="reorder_menu_item">Reorder Items</string>
+    <string name="connection_status">Connection Status</string>
+    <string name="status_indicator">Status Indicator</string>
+    <string name="offline">Offline</string>
+    <string name="online">Online</string>
+    <string name="connecting">Connecting</string>
+    <string name="not_responding">Not Responding</string>
+    <string name="bright_icon">Icon for bright brightness</string>
+    <string name="name_placeholder">Name</string>
 </resources>

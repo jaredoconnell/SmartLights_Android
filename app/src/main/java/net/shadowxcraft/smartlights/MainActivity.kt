@@ -23,8 +23,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.*
 import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
-import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
-import net.shadowxcraft.smartlights.ui.led_strip_groups.LedStripGroupsFragment
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.lang.Exception
@@ -386,7 +384,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             val position = cursor.getInt(1)
 
             if (position != lastPosition + 1) {
-                Log.println(Log.WARN, "MainActivity", "Invalid position while loading led strip positions")
+                Log.println(Log.WARN, "MainActivity", "Invalid position $position while loading led strip positions. lastPosition: $lastPosition")
             }
             lastPosition = position
 
@@ -418,7 +416,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             val position = cursor.getInt(1)
 
             if (position != lastPosition + 1) {
-                Log.println(Log.WARN, "MainActivity", "Invalid position while loading led strip positions")
+                Log.println(Log.WARN, "MainActivity", "Invalid position $position while loading led strip group positions. lastPosition: $lastPosition")
             }
             lastPosition = position
 

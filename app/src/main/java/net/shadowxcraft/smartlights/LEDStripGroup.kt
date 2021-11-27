@@ -55,7 +55,15 @@ class LEDStripGroup(id: String, name: String, private val ledStrips: ArrayList<L
             }
         }
     override var simpleColor: Color
-        get() = super.simpleColor
+        get() {
+            val color = ledStrips[0].simpleColor
+            for (i in 1 until ledStrips.size) {
+                if (ledStrips[i].simpleColor != color) {
+                    return Color()
+                }
+            }
+            return color
+        }
         set(simpleColor) {
             super.simpleColor = simpleColor
             for (i in ledStrips) {

@@ -1,0 +1,98 @@
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="25dp"
+    android:orientation="vertical"
+    android:background="@color/cardview_dark_background"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/status_indicator"
+        android:textSize="20sp"/>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_margin="8dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/status_circle"
+            android:contentDescription="@string/offline"
+            app:tint="@color/status_offline" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:layout_margin="3dp"
+            android:text="@string/offline"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+       <ImageView
+            android:layout_margin="8dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/status_circle"
+            android:contentDescription="@string/online"
+            app:tint="@color/status_online"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:layout_margin="3dp"
+            android:text="@string/online"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_margin="8dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/status_circle"
+            android:contentDescription="@string/connecting"
+            app:tint="@color/status_connecting"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:layout_margin="3dp"
+            android:text="@string/connecting"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_margin="8dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/status_circle"
+            android:contentDescription="@string/not_responding"
+            app:tint="@color/status_not_responding"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:layout_margin="3dp"
+            android:text="@string/not_responding"/>
+    </LinearLayout>
+
+
+
+</LinearLayout>

@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_groups"
-        android:name="net.shadowxcraft.smartlights.ui.led_strip_groups.LedStripGroupsFragment"
+        android:name="net.shadowxcraft.smartlights.ui.home.LedStripGroupsFragment"
         android:label="@string/title_groups"
         tools:layout="@layout/fragment_led_strips" />
 

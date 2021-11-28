@@ -91,7 +91,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
 
     fun reconnect() {
         connecting = true
-        SharedData.notifyDataChanged()
+        SharedData.notifyDataChanged(act)
         if (device == null)
             BLEControllerManager.attemptToConnectToAddr(addr)
         else
@@ -99,7 +99,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     }
 
     fun onDisconnect() {
-        SharedData.notifyDataChanged()
+        SharedData.notifyDataChanged(act)
     }
 
     /**
@@ -268,7 +268,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
         if (device != null) {
             name = device!!.name!!
         }
-        SharedData.notifyDataChanged() // To display connecting status
+        SharedData.notifyDataChanged(act) // To display connecting status
 
         val exec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 

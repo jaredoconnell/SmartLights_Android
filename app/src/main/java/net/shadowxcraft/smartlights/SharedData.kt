@@ -37,8 +37,10 @@ object SharedData {
 
     var loaded = false
 
-    fun notifyDataChanged() {
-        ledStripsFragment?.adapter?.notifyDataSetChanged()
-        ledStripGroupsFragment?.adapter?.notifyDataSetChanged()
+    fun notifyDataChanged(activity: MainActivity) {
+        activity.runOnUiThread {
+            ledStripsFragment?.adapter?.notifyDataSetChanged()
+            ledStripGroupsFragment?.adapter?.notifyDataSetChanged()
+        }
     }
 }

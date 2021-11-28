@@ -496,8 +496,6 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
     }
 
     private fun startBluetooth() {
-        Toast.makeText(this, "Starting bluetooth..", Toast.LENGTH_SHORT).show()
-
         BLEControllerManager.init(this)
 
         Handler().postDelayed({

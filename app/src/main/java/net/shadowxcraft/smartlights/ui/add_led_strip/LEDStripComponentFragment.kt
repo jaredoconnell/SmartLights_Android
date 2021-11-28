@@ -1,6 +1,5 @@
 package net.shadowxcraft.smartlights.ui.add_led_strip
 
-import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
@@ -8,8 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.util.keyIterator
-import androidx.core.util.valueIterator
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,7 +15,6 @@ import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.R.layout
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 /**

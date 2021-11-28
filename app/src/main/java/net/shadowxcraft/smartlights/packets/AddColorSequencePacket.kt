@@ -2,8 +2,6 @@ package net.shadowxcraft.smartlights.packets
 
 import net.shadowxcraft.smartlights.ColorSequence
 import net.shadowxcraft.smartlights.ESP32
-import net.shadowxcraft.smartlights.LEDStrip
-import net.shadowxcraft.smartlights.PWMDriver
 
 class AddColorSequencePacket(controller: ESP32, private val sequence: ColorSequence)
     : SendablePacket(controller, 8)

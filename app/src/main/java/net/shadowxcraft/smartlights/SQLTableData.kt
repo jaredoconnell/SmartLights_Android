@@ -1,7 +1,5 @@
 package net.shadowxcraft.smartlights
 
-import android.provider.BaseColumns
-
 object SQLTableData {
     const val SQL_CREATE_CONTROLLER_TABLE = "CREATE TABLE `${ControllerEntry.TABLE_NAME}` (" +
             "`id` INTEGER PRIMARY KEY AUTOINCREMENT," +

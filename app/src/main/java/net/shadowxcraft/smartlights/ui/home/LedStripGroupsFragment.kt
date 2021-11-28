@@ -1,10 +1,8 @@
 package net.shadowxcraft.smartlights.ui.home
 
-import android.content.Context
 import android.os.Bundle
 import android.view.*
-import android.widget.*
-import androidx.appcompat.widget.SwitchCompat
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -15,7 +13,6 @@ import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment
-import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
 import net.shadowxcraft.smartlights.ui.schedules.SchedulesFragment
 
 

@@ -2,8 +2,6 @@ package net.shadowxcraft.smartlights.packets
 
 import android.util.Log
 import net.shadowxcraft.smartlights.ESP32
-import net.shadowxcraft.smartlights.LEDStrip
-import net.shadowxcraft.smartlights.LEDStripComponent
 import net.shadowxcraft.smartlights.SharedData
 
 class ReceivedLEDStripUpdate(controller: ESP32, bytes: UByteArray)

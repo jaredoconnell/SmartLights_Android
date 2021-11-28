@@ -1,13 +1,5 @@
 package net.shadowxcraft.smartlights
 
-import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
 object ControllerManager {
     val controllerAddrMap = HashMap<String, ESP32>() // map addr to controller
     val controllerIDMap = HashMap<Int, ESP32>() // map addr to controller

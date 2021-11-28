@@ -1,7 +1,6 @@
 package net.shadowxcraft.smartlights
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import kotlinx.coroutines.Dispatchers

@@ -1,26 +1,16 @@
 package net.shadowxcraft.smartlights.ui.home
 
-import android.content.Context
-import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.os.Bundle
 import android.view.*
-import android.view.LayoutInflater
-import android.widget.*
-import android.widget.LinearLayout
-import androidx.appcompat.widget.SwitchCompat
-import androidx.core.content.ContextCompat.getSystemService
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.welie.blessed.BluetoothPeripheral
 import net.shadowxcraft.smartlights.*
-import net.shadowxcraft.smartlights.BLEControllerManager.activity
 import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
-import net.shadowxcraft.smartlights.ui.calibrate_led_strip.CalibrateLedStripFragment
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
 import net.shadowxcraft.smartlights.ui.colors.ColorsFragment
 import net.shadowxcraft.smartlights.ui.controllers.ControllersFragment

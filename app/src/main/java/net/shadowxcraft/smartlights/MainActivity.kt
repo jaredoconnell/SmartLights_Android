@@ -15,18 +15,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.database.getStringOrNull
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.*
-import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import net.shadowxcraft.smartlights.ui.add_led_strip.LEDStripComponentFragment
+import net.shadowxcraft.smartlights.ui.bluetooth.BluetoothFragment
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-import java.lang.Exception
 
 const val REQUEST_LOCATION_PERMISSION = 100
 

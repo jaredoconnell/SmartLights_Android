@@ -1,8 +1,5 @@
 package net.shadowxcraft.smartlights
 
-import java.util.*
-import kotlin.collections.HashMap
-
 class PWMDriver(val i2cAddress: Int) : PinDriver {
     var pins: HashMap<String, Int> = HashMap()
 

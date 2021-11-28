@@ -1,9 +1,6 @@
 package net.shadowxcraft.smartlights.packets
 
-import net.shadowxcraft.smartlights.Color
-import net.shadowxcraft.smartlights.ESP32
 import net.shadowxcraft.smartlights.LEDStrip
-import net.shadowxcraft.smartlights.PWMDriver
 
 class SetLEDStripCalibrationValue(private val ledStrip: LEDStrip,
                                   private val selectedIndex: Int,

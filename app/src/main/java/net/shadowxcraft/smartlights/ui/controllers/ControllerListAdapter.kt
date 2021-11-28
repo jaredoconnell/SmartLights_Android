@@ -8,7 +8,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import net.shadowxcraft.smartlights.*
+import net.shadowxcraft.smartlights.ButtonClickListener
+import net.shadowxcraft.smartlights.ESP32
+import net.shadowxcraft.smartlights.R
 
 // TODO: Fix memory leaks caused by things referencing each other.
 

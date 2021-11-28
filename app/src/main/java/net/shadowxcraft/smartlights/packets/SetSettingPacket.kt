@@ -1,6 +1,7 @@
 package net.shadowxcraft.smartlights.packets
 
-import net.shadowxcraft.smartlights.*
+import net.shadowxcraft.smartlights.ControllerSetting
+import net.shadowxcraft.smartlights.ESP32
 
 class SetSettingPacket(controller: ESP32, private val setting: ControllerSetting)
     : SendablePacket(controller, 18)

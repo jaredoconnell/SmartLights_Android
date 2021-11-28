@@ -1,10 +1,8 @@
 package net.shadowxcraft.smartlights
 
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
 import net.shadowxcraft.smartlights.ui.home.LedStripGroupsFragment
+import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
 import java.util.*
 
 object SharedData {

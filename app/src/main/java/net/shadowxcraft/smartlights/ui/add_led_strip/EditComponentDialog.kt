@@ -4,8 +4,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.view.View
 import android.widget.*
-import androidx.core.util.keyIterator
-import androidx.core.util.valueIterator
 import net.shadowxcraft.smartlights.BLEControllerManager
 import net.shadowxcraft.smartlights.LEDStripComponent
 import net.shadowxcraft.smartlights.R

@@ -1,8 +1,8 @@
 package net.shadowxcraft.smartlights
 
-import java.util.*
-import org.joda.time.DateTime;
+import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
+import java.util.*
 
 class ScheduledChange(val id: String, var name: String, var ledStrip: LEDStrip?) {
     // name max length 29

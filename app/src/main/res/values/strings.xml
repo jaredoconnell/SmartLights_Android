@@ -2,11 +2,8 @@
     <string name="app_name">SmartLights</string>
     <string name="title_led_strips">Led Strips</string>
     <string name="title_groups">Groups</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="manage_bluetooth">Manage Bluetooth Light Controllers</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bluetooth_scanner_message">Scanning for nearby devices…</string>
     <string name="controller_list_message">Tap on a controller to add an LED Strip\nOr tap on the + to connect to a controller.</string>
     <string name="rename_dialog_title">Rename Controller</string>
@@ -22,25 +19,20 @@
     <string name="bluetooth_not_supported">Bluetooth Not Supported</string>
     <string name="add_pwm_driver">Add PWM Driver</string>
     <string name="pwm_driver_id">PWM Controller ID:</string>
-    <string name="cancel">Cancel</string>
     <string name="driver_id">Driver ID:</string>
     <string name="address">Address</string>
     <string name="connect">Connect</string>
-    <string name="set_colors">Set Colors</string>
     <string name="color_sequences" >Color Sequences</string>
     <string name="schedules" >Schedules</string>
     <string name="edit">Edit</string>
     <string name="edit_color_sequence">Edit Color Sequence</string>
-    <string name="edit_scheduled_change">Edit Scheduled Change</string>
     <string name="name_color_sequence_field">Color Sequence Name</string>
     <string name="the_color_preview">The color preview</string>
     <string name="color_preview_view_explanation">A preview of the color</string>
     <string name="name_led_strip_field">LED Strip Name</string>
-    <string name="preview">Preview</string>
     <string name="transition_time_editor_title">Transition Time (Minutes:Seconds:60ths)</string>
     <string name="off">OFF</string>
     <string name="on">ON</string>
-    <string name="rename">Rename</string>
     <string name="rename_explanation">Rename the controller</string>
     <string name="color_temp_background_description">The color temp background</string>
     <string name="sustain_time_label">Sustain Time (Minutes:Seconds:60ths)</string>
@@ -51,7 +43,6 @@
     <string name="edit_timers_button_description">The button to edit timers</string>
     <string name="name_scheduled_change_field">Name of Scheduled Change</string>
     <string name="title_settings">Settings</string>
-    <string name="turn_off">Turn off</string>
     <string name="calibrate">Calibrate</string>
     <string name="drag">Press and hold to drag</string>
     <string name="reorder_menu_item">Reorder Items</string>

@@ -1,6 +1,5 @@
 package net.shadowxcraft.smartlights.ui.bluetooth
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View

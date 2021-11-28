@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.database.getStringOrNull
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
@@ -44,7 +45,9 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        val navController = findNavController(R.id.nav_host_fragment)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        SharedData.navFragment = navHostFragment
+        val navController = navHostFragment.navController
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
@@ -52,8 +55,14 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 R.id.navigation_home, R.id.navigation_groups
             )
         )
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        navView.selectedItemId = getPreferences(Context.MODE_PRIVATE)
+            .getInt("last_page", R.id.navigation_home)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            getPreferences(Context.MODE_PRIVATE).edit().putInt("last_page", destination.id).apply()
+        }
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         requestLocationPermission()
 

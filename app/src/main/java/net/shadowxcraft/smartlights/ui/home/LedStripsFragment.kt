@@ -107,7 +107,8 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
                 dialog = ColorEditorDialog(
                     BLEControllerManager.activity!!,
                     ledStrip!!.simpleColor,
-                    ledStrip
+                    ledStrip,
+                    position
                 )
                 dialog!!.listener = this
                 dialog!!.display()
@@ -124,7 +125,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         // Clear the preview that likely built up.
         dialog!!.ledStrip!!.controller.clearQueueForPacketID(19)
         SetColorForLEDStripPacket(dialog!!.ledStrip!!, color, 0u).send()// indefinitely
-        adapter?.notifyDataSetChanged()
+        dialog!!.ledStripIndex?.let { adapter?.notifyItemChanged(it) }
     }
 
     /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -152,8 +153,8 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
                 if (!adapter!!.reorderMode)
                     return false
                 val adapter = recyclerView.adapter as RecyclerView.Adapter<*>
-                val from = viewHolder.adapterPosition
-                val to = target.adapterPosition
+                val from = viewHolder.bindingAdapterPosition
+                val to = target.bindingAdapterPosition
                 OrderingManager.moveLEDStripOrder(from, to, false)
                 adapter.notifyItemMoved(from, to)
                 return true

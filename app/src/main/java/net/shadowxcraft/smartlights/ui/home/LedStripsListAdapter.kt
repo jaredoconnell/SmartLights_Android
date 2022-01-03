@@ -1,5 +1,6 @@
 package net.shadowxcraft.smartlights.ui.home
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.*
 import android.widget.*
@@ -91,17 +92,20 @@ class LEDStripListAdapter(
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 }
 
+                @SuppressLint("NotifyDataSetChanged")
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    if (ledStrip is LEDStripGroup)
+                        notifyDataSetChanged()
                 }
             })
             colorsButtonView.setOnClickListener {
-                setColorClickListener.onButtonClicked(adapterPosition, R.id.set_colors_button)
+                setColorClickListener.onButtonClicked(absoluteAdapterPosition, R.id.set_colors_button)
             }
             colorButtonView.setOnClickListener {
-                setColorClickListener.onButtonClicked(adapterPosition, R.id.set_color_button)
+                setColorClickListener.onButtonClicked(absoluteAdapterPosition, R.id.set_color_button)
             }
             editSchedulesView.setOnClickListener {
-                setColorClickListener.onButtonClicked(adapterPosition, R.id.edit_schedules_button)
+                setColorClickListener.onButtonClicked(absoluteAdapterPosition, R.id.edit_schedules_button)
             }
             colorButtonView.drawable.mutate().setTint(ledStrip.simpleColor.toArgb())
 

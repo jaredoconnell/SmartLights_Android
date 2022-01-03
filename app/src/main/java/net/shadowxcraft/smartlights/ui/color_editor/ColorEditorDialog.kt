@@ -1,12 +1,14 @@
 package net.shadowxcraft.smartlights.ui.color_editor
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import com.madrapps.pikolo.HSLColorPicker
 import com.madrapps.pikolo.listeners.SimpleColorSelectionListener
 import net.shadowxcraft.smartlights.Color
@@ -14,7 +16,7 @@ import net.shadowxcraft.smartlights.LEDStrip
 import net.shadowxcraft.smartlights.R
 import net.shadowxcraft.smartlights.packets.SetColorForLEDStripPacket
 
-class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledStrip: LEDStrip?)
+class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledStrip: LEDStrip?, val ledStripIndex: Int? = null)
     : SimpleColorSelectionListener(), SeekBar.OnSeekBarChangeListener
 {
     private var lastColor = initialColor.toArgb()
@@ -37,7 +39,7 @@ class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledS
         colorPicker = view.findViewById(R.id.colorPicker)
         backgroundImage = view.findViewById(R.id.color_picker_preview_background)
         colorPicker.setColor(lastColor)
-        backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
+        backgroundImage.background.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(lastColor, BlendModeCompat.SRC_ATOP)
         // Hide the seekbar until touched
         colorTempSeekBar.thumb.mutate().alpha = 0
         // Show background
@@ -75,12 +77,13 @@ class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledS
         colorTempSeekBar.progress = 0
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onProgressChanged(seek: SeekBar,
                                    progress: Int, fromUser: Boolean)
     {
         // Show the seekbar
         colorTempSeekBar.thumb.mutate().alpha = 255
-        val colorTemp = progress * 100 + 1000;
+        val colorTemp = progress * 100 + 1000
         val color = Color(colorTemp, 255)
         onSelectedColor(color)
         colorPicker.setColor(lastColor)
@@ -90,7 +93,7 @@ class ColorEditorDialog(private val act: Activity, initialColor: Color, val ledS
 
     private fun onSelectedColor(color: Color) {
         lastColor = color.toArgb()
-        backgroundImage.background.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
+        backgroundImage.background.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(lastColor, BlendModeCompat.SRC_ATOP)
         if (ledStrip != null) {
             SetColorForLEDStripPacket(ledStrip, color, 5000u).queue()
         }

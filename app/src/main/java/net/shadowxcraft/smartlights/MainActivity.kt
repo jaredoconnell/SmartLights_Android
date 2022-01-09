@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
                 loadPWMDrivers(db)
                 loadLEDStripOrders(db)
                 loadLEDStripGroupOrders(db)
+                loadColorSequenceOrders(db)
                 loadLEDStrips(db)
                 loadLEDStripGroups(db)
                 db.close()
@@ -428,6 +429,36 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
             lastPosition = position
 
             OrderingManager.ledStripGroupPositions.add(uuid)
+
+        }
+        cursor.close()
+    }
+    private fun loadColorSequenceOrders(db: SQLiteDatabase) {
+        OrderingManager.colorSequencePositions.clear()
+        val selectedCols = arrayOf(
+            SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_COLOR_SEQUENCE_ID,
+            SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_POSITION
+        )
+        val cursor = db.query(
+            SQLTableData.ColorSequenceDisplayOptionsEntry.TABLE_NAME,
+            selectedCols,
+            null,
+            null,
+            null,
+            null,
+            SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_POSITION
+        )
+        var lastPosition = -1
+        while (cursor.moveToNext()) {
+            val uuid = cursor.getString(0)
+            val position = cursor.getInt(1)
+
+            if (position != lastPosition + 1) {
+                Log.println(Log.WARN, "MainActivity", "Invalid position $position while loading led strip group positions. lastPosition: $lastPosition")
+            }
+            lastPosition = position
+
+            OrderingManager.colorSequencePositions.add(uuid)
 
         }
         cursor.close()

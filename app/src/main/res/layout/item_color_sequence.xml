@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
@@ -55,6 +56,17 @@
                     android:layout_gravity="end"
                     android:padding="10dp"
                     android:text="@string/edit"/>
+                <ImageView
+                    android:id="@+id/drag_handle"
+                    android:layout_height="51dp"
+                    android:layout_width="80dp"
+                    android:layout_gravity="end"
+                    android:padding="10dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    app:srcCompat="@drawable/ic_baseline_drag_handle_24"
+                    android:visibility="gone"
+                    android:contentDescription="@string/drag"/>
             </LinearLayout>
         </LinearLayout>
 

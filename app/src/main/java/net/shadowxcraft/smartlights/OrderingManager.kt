@@ -12,6 +12,7 @@ object OrderingManager {
 
     val ledStripPositions = ArrayList<String>()
     val ledStripGroupPositions = ArrayList<String>()
+    val colorSequencePositions = ArrayList<String>()
 
     fun getLedStripPositions(isGroup: Boolean) : ArrayList<String> {
         return if (isGroup)
@@ -114,6 +115,74 @@ object OrderingManager {
             SQLTableData.LEDStripGroupDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID
         } else {
             SQLTableData.LEDStripDisplayOptionsEntry.COLUMN_NAME_LEDSTRIP_ID
+        }
+    }
+
+    fun checkColorSequenceOrder() {
+        val positions = colorSequencePositions
+        for (controller in ControllerManager.controllers) {
+            val colorSequences = SharedData.colorsSequences
+            for (sequence in colorSequences) {
+                if (sequence.value.id !in positions) {
+                    Log.i("ControllerManager",
+                        "Missing color sequence position. Adding...."
+                    )
+                    positions.add(sequence.value.id)
+                    val position = positions.size - 1
+                    GlobalScope.launch {
+                        withContext(Dispatchers.IO) {
+                            val database = DBHelper(controller.act).writableDatabase
+                            val values = ContentValues()
+
+                            val tableName = SQLTableData.ColorSequenceDisplayOptionsEntry.TABLE_NAME
+                            val positionColName = SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_POSITION
+                            val colorSequenceIdColName = SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_COLOR_SEQUENCE_ID
+                            values.put(positionColName, position)
+                            values.put(colorSequenceIdColName, sequence.key)
+                            database.insertWithOnConflict(tableName,
+                                null, values, SQLiteDatabase.CONFLICT_REPLACE)
+                            database.close()
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun moveColorSequenceOrder(from: Int, to: Int) {
+        Log.println(Log.DEBUG, "OrderingManager", "Moving Color Sequence position.")
+        // Swap
+        val positions = colorSequencePositions
+        val colorSequence = positions.removeAt(from)
+        positions.add(to, colorSequence)
+
+        // Update all locations from the minimum of the old location to the end.
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                val min = if (from < to) from else to
+
+                val database = DBHelper(BLEControllerManager.activity!!.baseContext).writableDatabase
+                val tableName = SQLTableData.ColorSequenceDisplayOptionsEntry.TABLE_NAME
+                val positionColName = SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_POSITION
+                val colorSequenceIdColName = SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_COLOR_SEQUENCE_ID
+
+                for (i in min until positions.size) {
+                    val curColorSequence = positions[i]
+                    val values1 = ContentValues()
+                    Log.println(
+                        Log.DEBUG, "ControllerManager",
+                        "Saving $curColorSequence to position $i"
+                    )
+                    values1.put(positionColName, i)
+                    values1.put(colorSequenceIdColName, curColorSequence)
+                    database.insertWithOnConflict(tableName,
+                        null, values1, SQLiteDatabase.CONFLICT_REPLACE)
+                }
+                database.delete(tableName,
+                    positionColName + " >= " + positions.size, null)
+                database.close()
+            }
         }
     }
 

@@ -116,4 +116,19 @@ class ColorSequence(val id: String, var name: String) {
             }
         }
     }
+
+    fun deleteFromDB(context: Context) {
+        val database = DBHelper(context).writableDatabase
+
+        database.delete(
+            SQLTableData.ColorSequenceEntry.TABLE_NAME, "uuid=?",
+            arrayOf(id)
+        )
+        OrderingManager.colorSequencePositions.remove(id)
+        database.delete(
+            SQLTableData.ColorSequenceDisplayOptionsEntry.TABLE_NAME,
+            "${SQLTableData.ColorSequenceDisplayOptionsEntry.COLUMN_NAME_COLOR_SEQUENCE_ID}=?",
+            arrayOf(id)
+        )
+    }
 }

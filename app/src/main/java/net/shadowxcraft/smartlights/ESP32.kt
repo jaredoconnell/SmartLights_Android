@@ -83,6 +83,10 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
         }, 200, 100)
     }
 
+    fun isConnected() : Boolean {
+        return device != null && device?.state == BluetoothPeripheral.STATE_CONNECTED
+    }
+
     fun checkConnection() {
         if (device == null || device?.state == BluetoothPeripheral.STATE_DISCONNECTED) {
             reconnect()
@@ -229,6 +233,15 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
             AddColorSequencePacket(this, colorSequence).send()
         // save
         colorSequence.saveToDB(act)
+    }
+
+    fun deleteColorSequence(colorSequence: ColorSequence, sendPacket: Boolean) {
+        SharedData.colorsSequences.remove(colorSequence.id)
+        if (sendPacket) {
+            DeleteColorSequencePacket(this, colorSequence).send()
+        }
+        // Delete in DB
+        colorSequence.deleteFromDB(act)
     }
 
     private fun checkName(listener: BLEControllerManager.BluetoothConnectionListener?) {

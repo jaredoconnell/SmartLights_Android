@@ -123,6 +123,12 @@ object BLEControllerManager : BluetoothCentralCallback() {
                 "Bluetooth Connection Failed: $status",
                 Toast.LENGTH_SHORT
             ).show()
+            if (activity != null) {
+                // To display connecting status
+                val controller = connected[peripheral.address]
+                controller?.connecting
+                SharedData.notifyDataChanged(activity!!)
+            }
         }
     }
 

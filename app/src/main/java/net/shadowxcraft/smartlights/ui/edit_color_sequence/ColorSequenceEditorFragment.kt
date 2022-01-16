@@ -1,9 +1,7 @@
 package net.shadowxcraft.smartlights.ui.edit_color_sequence
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -41,6 +39,8 @@ class ColorSequenceEditorFragment(private val act: FragmentActivity, private val
     ): View? {
         // Inflate the layout for this fragment
         val currentView: View = inflater.inflate(layout.fragment_edit_color_sequence, container, false)
+
+        setHasOptionsMenu(true)
 
         tabLayout = currentView.findViewById(R.id.tabs)
         flipper = currentView.findViewById(R.id.flipper)
@@ -153,6 +153,29 @@ class ColorSequenceEditorFragment(private val act: FragmentActivity, private val
         rvControllers.layoutManager = LinearLayoutManager(context)
 
         return currentView
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.color_sequence_edit_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        return if (id == R.id.action_delete) {
+            deleteColorSequence()
+            true
+        } else super.onOptionsItemSelected(item)
+    }
+
+    private fun deleteColorSequence() {
+        if (controller.isConnected()) {
+            controller.deleteColorSequence(colorSequence, true)
+            act.supportFragmentManager.popBackStack()
+            Toast.makeText(act, "Deleted.", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(act, "Can't delete. Not connected.", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onButtonClicked(position: Int, itemId: Int) {

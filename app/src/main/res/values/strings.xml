@@ -54,4 +54,5 @@
     <string name="not_responding">Not Responding</string>
     <string name="bright_icon">Icon for bright brightness</string>
     <string name="name_placeholder">Name</string>
+    <string name="delete_menu_item">Delete</string>
 </resources>

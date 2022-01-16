@@ -258,6 +258,7 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
     }
 
     fun getNthColorSequence(index: Int) : ColorSequence? {
+        OrderingManager.checkColorSequenceOrder()
         val colorSequenceList = OrderingManager.colorSequencePositions
 
         if (index >= colorSequenceList.size)

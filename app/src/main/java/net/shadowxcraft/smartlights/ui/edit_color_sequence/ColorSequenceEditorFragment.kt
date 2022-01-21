@@ -13,6 +13,10 @@ import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.R.layout
 import net.shadowxcraft.smartlights.packets.SetColorSequenceForLEDStripPacket
 import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
+import android.content.DialogInterface
+import androidx.appcompat.app.AlertDialog
+import net.shadowxcraft.smartlights.packets.AddColorSequencePacket
+import net.shadowxcraft.smartlights.packets.SetButtonColorSequencePacket
 
 
 /**
@@ -23,7 +27,7 @@ import net.shadowxcraft.smartlights.ui.color_editor.ColorEditorDialog
  * Use the [ScheduledChangeEditorFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ColorSequenceEditorFragment(private val act: FragmentActivity, private val colorSequence: ColorSequence,
+class ColorSequenceEditorFragment(private val act: FragmentActivity, val colorSequence: ColorSequence,
                                   private val controller: ESP32, private val ledstrip: LEDStrip?,
                                   private val scheduledChange: ScheduledChange? = null)
     : Fragment(), ButtonClickListener, ColorEditorDialog.ColorSelectedListener,
@@ -41,6 +45,8 @@ class ColorSequenceEditorFragment(private val act: FragmentActivity, private val
         val currentView: View = inflater.inflate(layout.fragment_edit_color_sequence, container, false)
 
         setHasOptionsMenu(true)
+
+        SharedData.editColorSequenceFragment = this
 
         tabLayout = currentView.findViewById(R.id.tabs)
         flipper = currentView.findViewById(R.id.flipper)
@@ -155,6 +161,12 @@ class ColorSequenceEditorFragment(private val act: FragmentActivity, private val
         return currentView
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (SharedData.editColorSequenceFragment == this)
+            SharedData.editColorSequenceFragment = null
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.color_sequence_edit_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -162,10 +174,37 @@ class ColorSequenceEditorFragment(private val act: FragmentActivity, private val
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-        return if (id == R.id.action_delete) {
-            deleteColorSequence()
-            true
-        } else super.onOptionsItemSelected(item)
+        return when (id) {
+            R.id.action_delete -> {
+                deleteColorSequence()
+                true
+            }
+            R.id.action_associate_button -> {
+                showButtonAssociatePopup()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showButtonAssociatePopup() {
+        if (!controller.isConnected()) {
+            Toast.makeText(act, "Can't set buttons because not connected.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(act, "Attempting to reconnect....", Toast.LENGTH_SHORT).show()
+            controller.checkConnection()
+            return
+        }
+
+        val buttons = arrayOf("DIY1", "DIY2", "DIY3", "DIY4", "DIY5", "DIY6")
+
+        val builder: AlertDialog.Builder = AlertDialog.Builder(act)
+        builder.setTitle("Select a Button")
+        builder.setItems(buttons) { _, which ->
+            AddColorSequencePacket(controller, colorSequence).send()
+            SetButtonColorSequencePacket(controller, colorSequence, which + 1).send()
+            Toast.makeText(act, "Set.", Toast.LENGTH_SHORT).show()
+        }
+        builder.show()
     }
 
     private fun deleteColorSequence() {

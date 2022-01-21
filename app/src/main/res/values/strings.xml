@@ -55,4 +55,5 @@
     <string name="bright_icon">Icon for bright brightness</string>
     <string name="name_placeholder">Name</string>
     <string name="delete_menu_item">Delete</string>
+    <string name="associate_button_menu_item">Associate To Remote Button</string>
 </resources>

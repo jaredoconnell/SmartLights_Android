@@ -1,6 +1,7 @@
 package net.shadowxcraft.smartlights
 
 import androidx.fragment.app.Fragment
+import net.shadowxcraft.smartlights.ui.edit_color_sequence.ColorSequenceEditorFragment
 import net.shadowxcraft.smartlights.ui.home.LedStripGroupsFragment
 import net.shadowxcraft.smartlights.ui.home.LedStripsFragment
 import java.util.*
@@ -9,6 +10,8 @@ object SharedData {
     val colorsSequences: TreeMap<String, ColorSequence> = TreeMap()
 
     var navFragment: Fragment? = null
+
+    var editColorSequenceFragment: ColorSequenceEditorFragment? = null
 
     var ledStripsFragment: LedStripsFragment? = null
         get() {

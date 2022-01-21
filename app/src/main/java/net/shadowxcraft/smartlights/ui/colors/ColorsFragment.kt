@@ -206,7 +206,7 @@ class ColorsListListAdapter(val controller: ESP32, val clickListener: ClickListe
         private val dragHandle: ImageView = itemView.findViewById(R.id.drag_handle)
 
         override fun onClick(v: View?) {
-            clickListener.onPositionClicked(adapterPosition)
+            clickListener.onPositionClicked(absoluteAdapterPosition)
         }
 
         init {

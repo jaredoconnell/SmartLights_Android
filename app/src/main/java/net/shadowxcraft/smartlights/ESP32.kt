@@ -14,6 +14,7 @@ import androidx.core.util.isNotEmpty
 import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
+import com.welie.blessed.ConnectionState
 import com.welie.blessed.GattStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -71,7 +72,7 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
                     packet.send()
                 }
                 if (unreceivedPackets.isNotEmpty() && device != null
-                    && device?.state == BluetoothPeripheral.STATE_CONNECTED)
+                    && device?.state == ConnectionState.CONNECTED)
                 {
                     val packet = unreceivedPackets.valueAt(0)
                     if (System.currentTimeMillis() - packet.sendTime > 2000) {
@@ -84,11 +85,11 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
     }
 
     fun isConnected() : Boolean {
-        return device != null && device?.state == BluetoothPeripheral.STATE_CONNECTED
+        return device != null && device?.state == ConnectionState.CONNECTED
     }
 
     fun checkConnection() {
-        if (device == null || device?.state == BluetoothPeripheral.STATE_DISCONNECTED) {
+        if (device == null || device?.state ==ConnectionState.DISCONNECTED) {
             reconnect()
         }
     }
@@ -373,8 +374,11 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
         characteristic: BluetoothGattCharacteristic,
         status: GattStatus
     ) {
-        Log.println(Log.INFO, "ESP32", "onNotificationStateUpdate")
-        device!!.readCharacteristic(characteristic)
+        Log.i("ESP32", "Characteristic properties: " + Integer.toBinaryString(characteristic.properties))
+        if (characteristic.uuid == BLEControllerManager.TO_PHONE_UUID) {
+            Log.println(Log.INFO, "ESP32", "onNotificationStateUpdate")
+            device!!.readCharacteristic(characteristic)
+        }
     }
 
     @ExperimentalUnsignedTypes
@@ -409,15 +413,12 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
         characteristic: BluetoothGattCharacteristic,
         status: GattStatus
     ) {
+        if (value.isEmpty())
+            return
         Log.println(Log.INFO, "ESP32", "onCharacteristicUpdate got packet!")
         val packet: ReceivedPacket? = value?.let { getPacket(it.toUByteArray()) }
         Log.println(Log.INFO, "ESP32", "Packet: " + packet?.javaClass?.name)
         packet?.process()
-        /*Toast.makeText(
-            BLEControllerManager.activity,
-            "Got data " + dataAsStr,
-            Toast.LENGTH_SHORT
-        ).show()*/
     }
 
     /**

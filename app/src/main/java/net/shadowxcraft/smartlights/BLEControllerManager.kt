@@ -1,25 +1,27 @@
 package net.shadowxcraft.smartlights
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import com.welie.blessed.BluetoothCentral
-import com.welie.blessed.BluetoothCentralCallback
-import com.welie.blessed.BluetoothPeripheral
-import com.welie.blessed.HciStatus
+import androidx.core.app.ActivityCompat
+import com.welie.blessed.*
+import org.jetbrains.annotations.NotNull
 import java.util.*
 
 
 const val REQUEST_ENABLE_BT = 50
 
-object BLEControllerManager : BluetoothCentralCallback() {
+object BLEControllerManager : BluetoothCentralManagerCallback() {
 
-    var bluetoothCentral: BluetoothCentral? = null
+    var bluetoothCentral: BluetoothCentralManager? = null
     // BluetoothDevice represents the device that can be connected
     // BluetoothGatt represents the actual connection.
     private val connected: HashMap<String, ESP32> = HashMap()
@@ -42,12 +44,20 @@ object BLEControllerManager : BluetoothCentralCallback() {
 
     fun init(activity: MainActivity) {
         this.activity = activity
-        bluetoothCentral = BluetoothCentral(activity, this, Handler(Looper.getMainLooper()))
+        bluetoothCentral = BluetoothCentralManager(activity, this, Handler(Looper.getMainLooper()))
         val bluetoothManager: BluetoothManager =
             activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
 
         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        if (ActivityCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // No permission.
+            return
+        }
         activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
     }
 
@@ -74,7 +84,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
             // Already has
             val controller = connected[device.address]
             bluetoothCentral!!.connectPeripheral(controller!!.device!!, controller)
-            if (device.bondState == BluetoothPeripheral.BOND_NONE)
+            if (device.bondState == BondState.NONE)
                 device.createBond()
             return false
         } else {
@@ -94,7 +104,7 @@ object BLEControllerManager : BluetoothCentralCallback() {
         }
     }
 
-    override fun onScanFailed(errorCode: Int) {
+    override fun onScanFailed(scanFailure: ScanFailure) {
         this.externScanListener?.onScanFailed()
     }
 

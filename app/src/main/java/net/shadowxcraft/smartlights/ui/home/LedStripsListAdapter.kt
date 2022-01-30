@@ -8,6 +8,7 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.welie.blessed.BluetoothPeripheral
+import com.welie.blessed.ConnectionState
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.ui.calibrate_led_strip.CalibrateLedStripFragment
 
@@ -63,6 +64,8 @@ class LEDStripListAdapter(
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                    if (ledStrip is LEDStripGroup)
+                        notifyDataSetChanged()
                 }
             }
             dragHandle.visibility = if (reorderMode) {
@@ -121,14 +124,14 @@ class LEDStripListAdapter(
                         null
                     )
                 )
-            } else if (device == null || device.state == BluetoothPeripheral.STATE_DISCONNECTED) {
+            } else if (device == null || device.state == ConnectionState.DISCONNECTED) {
                 statusIndicator.setColorFilter(
                     BLEControllerManager.activity!!.resources.getColor(
                         R.color.status_offline,
                         null
                     )
                 )
-            } else if (device.state == BluetoothPeripheral.STATE_CONNECTED) {
+            } else if (device.state == ConnectionState.CONNECTED) {
                 statusIndicator.setColorFilter(BLEControllerManager.activity!!.resources.getColor(R.color.status_online, null))
             } else {
                 statusIndicator.setColorFilter(BLEControllerManager.activity!!.resources.getColor(R.color.status_connecting, null))

@@ -7,7 +7,6 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.ConnectionState
 import net.shadowxcraft.smartlights.*
 import net.shadowxcraft.smartlights.ui.calibrate_led_strip.CalibrateLedStripFragment
@@ -16,6 +15,7 @@ import net.shadowxcraft.smartlights.ui.calibrate_led_strip.CalibrateLedStripFrag
 // Create the basic adapter extending from RecyclerView.Adapter
 // Note that we specify the custom ViewHolder which gives us access to our views
 class LEDStripListAdapter(
+    private val context: Context?,
     private val setColorClickListener: ButtonClickListener,
     private val parentFragmentManager: FragmentManager,
     private val isGroups: Boolean
@@ -119,22 +119,22 @@ class LEDStripListAdapter(
             val device = ledStrip.controller.device
             if (ledStrip.controller.connecting) {
                 statusIndicator.setColorFilter(
-                    BLEControllerManager.activity!!.resources.getColor(
+                    context!!.resources.getColor(
                         R.color.status_connecting,
                         null
                     )
                 )
             } else if (device == null || device.state == ConnectionState.DISCONNECTED) {
                 statusIndicator.setColorFilter(
-                    BLEControllerManager.activity!!.resources.getColor(
+                    context!!.resources.getColor(
                         R.color.status_offline,
                         null
                     )
                 )
             } else if (device.state == ConnectionState.CONNECTED) {
-                statusIndicator.setColorFilter(BLEControllerManager.activity!!.resources.getColor(R.color.status_online, null))
+                statusIndicator.setColorFilter(context!!.resources.getColor(R.color.status_online, null))
             } else {
-                statusIndicator.setColorFilter(BLEControllerManager.activity!!.resources.getColor(R.color.status_connecting, null))
+                statusIndicator.setColorFilter(context!!.resources.getColor(R.color.status_connecting, null))
             }
         }
 

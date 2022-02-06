@@ -49,7 +49,7 @@ class LedStripGroupsFragment : Fragment(), ButtonClickListener, ColorEditorDialo
         rvControllers.addItemDecoration(itemDecoration)
 
         // Create adapter that uses the list of LED strips.
-        adapter = LEDStripListAdapter(this, parentFragmentManager, true)
+        adapter = LEDStripListAdapter(context, this, parentFragmentManager, true)
         //adapter = LEDStripGroupListAdapter(this, rvControllers)
 
 

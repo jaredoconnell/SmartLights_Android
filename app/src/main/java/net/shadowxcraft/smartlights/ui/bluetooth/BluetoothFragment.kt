@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -76,9 +77,14 @@ class BluetoothFragment : Fragment(), ClickListener {
             param2 = it.getString(ARG_PARAM2)
         }
         if(BLEControllerManager.supportsBluetooth()) {
-            Log.println(Log.INFO, "BluetoothFragment", "Starting bluetooth scan.")
-            BLEControllerManager.setScanListener(scanCallback)
-            BLEControllerManager.startScan()
+            if (BLEControllerManager.hasBluetoothPerms())
+            {
+                Log.println(Log.INFO, "BluetoothFragment", "Starting bluetooth scan.")
+                BLEControllerManager.setScanListener(scanCallback)
+                BLEControllerManager.startScan()
+            } else {
+                Toast.makeText(context, "Location Permission Missing. Can't scan bluetooth.", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

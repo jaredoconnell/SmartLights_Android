@@ -2,18 +2,17 @@ package net.shadowxcraft.smartlights
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.welie.blessed.*
-import org.jetbrains.annotations.NotNull
 import java.util.*
 
 
@@ -50,15 +49,30 @@ object BLEControllerManager : BluetoothCentralManagerCallback() {
         bluetoothAdapter = bluetoothManager.adapter
 
         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // No permission.
+        if (!hasBluetoothPerms()) {
+            Toast.makeText(activity, "Bluetooth Permission Required", Toast.LENGTH_SHORT).show()
             return
         }
         activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+    }
+
+    fun hasBluetoothPerms() : Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return ActivityCompat.checkSelfPermission(
+                activity!!,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        if (activity == null)
+            return false
+        return ActivityCompat.checkSelfPermission(
+            activity!!,
+            Manifest.permission.BLUETOOTH_CONNECT
+        ) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(
+            activity!!,
+            Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun supportsBluetooth(): Boolean {

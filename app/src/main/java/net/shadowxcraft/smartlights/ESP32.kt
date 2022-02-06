@@ -11,7 +11,6 @@ import android.util.SparseArray
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.util.isNotEmpty
-import androidx.core.util.set
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
 import com.welie.blessed.ConnectionState
@@ -96,6 +95,16 @@ class ESP32(val act: MainActivity, val addr: String, var name: String)
 
     fun reconnect() {
         connecting = true
+
+        if (!BLEControllerManager.hasBluetoothPerms()) {
+            GlobalScope.launch {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(act, "Bluetooth permission missing", Toast.LENGTH_SHORT).show()
+                }
+            }
+            return
+        }
+
         SharedData.notifyDataChanged(act)
         if (device == null)
             BLEControllerManager.attemptToConnectToAddr(addr)

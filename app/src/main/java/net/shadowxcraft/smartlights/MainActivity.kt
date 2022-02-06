@@ -8,10 +8,10 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.database.getStringOrNull
@@ -512,14 +512,18 @@ class MainActivity : AppCompatActivity(), LEDStripComponentFragment.OnFragmentIn
 
     @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
     fun requestLocationPermission() {
-        val perms = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        val perms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN)
+        } else {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
         if (EasyPermissions.hasPermissions(this, *perms)) {
             startBluetooth()
         } else {
             EasyPermissions.requestPermissions(
                 this,
-                "Location perms are required to connect to" +
-                "the light strip controllers via bluetooth!",
+                "Location and bluetooth perms are required to connect to" +
+                        "the light strip controllers via bluetooth!",
                 REQUEST_LOCATION_PERMISSION,
                 *perms
             )

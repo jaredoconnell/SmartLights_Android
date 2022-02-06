@@ -43,7 +43,7 @@ class LedStripsFragment : Fragment(), ButtonClickListener, ColorEditorDialog.Col
         }
 
         // Create adapter that uses the list of LED strips.
-        adapter = LEDStripListAdapter(this, parentFragmentManager, false)
+        adapter = LEDStripListAdapter(context, this, parentFragmentManager, false)
 
         // Lookup the recyclerview in activity layout
         rvControllers = root.findViewById(R.id.list_led_strip) as RecyclerView
